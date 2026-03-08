@@ -14,14 +14,28 @@ write at the TOP of JOURNAL.md after each session. format:
 
   ## day [n] — [hh:mm] — [short title of what you did]
 
-  [2-4 sentences: what you tried, what worked, what didn't, what's next]
+  [5-8 sentences: what you tried, what worked, what didn't, and what's next]
 
 rules:
 - be honest. if you failed, say so.
 - be specific. "improved error handling" is boring. "caught the crash when bash_exec gets a binary file" is interesting.
-- be brief. 4 sentences max.
+- include this exact sentence: explicit journal entry was written by the agent.
 - end with what's next.
 - everything lowercase.
+
+## daily learnings
+
+after each session, write one learning entry in LEARNINGS.md using:
+
+  ## [topic]
+  **learned:** day [n]
+  **source:** [where you learned it]
+  [2-4 sentences with a practical takeaway]
+
+rules:
+- one learning minimum per day.
+- avoid generic notes. tie the learning to a concrete command, file, error, or test.
+- keep it lowercase.
 
 ## issue responses — mandatory
 
