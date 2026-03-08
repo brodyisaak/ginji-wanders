@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 import html
+import json
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
-
+SITE_URL = "https://brodyisaak.github.io/ginji-wanders/"
+SITE_NAME = "ginji"
+SITE_DESC = "ginji is a self-evolving python coding agent that journals progress in public."
+GITHUB_URL = "https://github.com/brodyisaak/ginji-wanders"
+ARCH_WIKI_URL = f"{GITHUB_URL}/blob/main/wiki/overview.md"
 
 def inline_format(text: str) -> str:
     clean = html.escape(text)
     clean = clean.replace("**", "")
     clean = clean.replace("`", "")
     return clean
-
 
 def parse_journal(text: str):
     entries = []
@@ -36,7 +41,6 @@ def parse_journal(text: str):
     entries.sort(key=lambda item: item["day"], reverse=True)
     return entries
 
-
 def parse_identity(text: str):
     before_rules, rules_part = (text.split("## my rules", 1) + [""])[:2]
     before_rules = before_rules.replace("# who i am", "").strip()
@@ -47,7 +51,6 @@ def parse_identity(text: str):
         if m:
             rules.append(m.group(1).strip())
     return paragraphs, rules
-
 
 def render_entries(entries):
     parts = []
@@ -68,7 +71,6 @@ def render_entries(entries):
         )
     return "\n".join(parts)
 
-
 def render_identity(paragraphs, rules):
     blocks = []
     if paragraphs:
@@ -82,20 +84,55 @@ def render_identity(paragraphs, rules):
         blocks.append("</ol>")
     return "\n".join(blocks)
 
+def build_structured_data(day_count: str) -> str:
+    payload = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": SITE_NAME,
+        "description": SITE_DESC,
+        "url": SITE_URL,
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Cross-platform",
+        "codeRepository": GITHUB_URL,
+        "author": {"@type": "Organization", "name": "brodyisaak"},
+        "keywords": ["ai coding agent", "python", "automation", "github actions", "journal"],
+        "version": f"day-{day_count}",
+    }
+    return json.dumps(payload, separators=(",", ":"))
 
 def build_html(day_count: str, entries_html: str, identity_html: str) -> str:
+    canonical = SITE_URL
+    og_image = f"{SITE_URL}og-image.svg"
+    title = "ginji | self-evolving python coding agent"
+    structured = build_structured_data(day_count)
     return f"""<!doctype html>
 <html lang=\"en\">
 <head>
   <meta charset=\"utf-8\" />
   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
-  <title>ginji</title>
+  <title>{title}</title>
+  <meta name=\"description\" content=\"{SITE_DESC}\" />
+  <meta name=\"robots\" content=\"index,follow,max-image-preview:large\" />
+  <meta name=\"theme-color\" content=\"#0d0a14\" />
+  <meta name=\"keywords\" content=\"ginji, ai coding agent, python cli, github actions, self-evolving agent\" />
+  <link rel=\"canonical\" href=\"{canonical}\" />
+  <meta property=\"og:type\" content=\"website\" />
+  <meta property=\"og:title\" content=\"{title}\" />
+  <meta property=\"og:description\" content=\"{SITE_DESC}\" />
+  <meta property=\"og:url\" content=\"{canonical}\" />
+  <meta property=\"og:site_name\" content=\"ginji\" />
+  <meta property=\"og:image\" content=\"{og_image}\" />
+  <meta name=\"twitter:card\" content=\"summary_large_image\" />
+  <meta name=\"twitter:title\" content=\"{title}\" />
+  <meta name=\"twitter:description\" content=\"{SITE_DESC}\" />
+  <meta name=\"twitter:image\" content=\"{og_image}\" />
   <link rel=\"stylesheet\" href=\"style.css\" />
+  <script type=\"application/ld+json\">{structured}</script>
 </head>
 <body>
 <nav>
   <a class=\"nav-name\" href=\"#top\">ginji</a>
-  <div class=\"nav-links\"><a href=\"#journal\">journal</a> · <a href=\"#identity\">identity</a> · <a href=\"book/index.md\">documentation</a> · <a href=\"https://github.com/brodyisaak/ginji-wanders/blob/main/wiki/overview.md\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"https://github.com/brodyisaak/ginji-wanders\" target=\"_blank\" rel=\"noreferrer\">github ↗</a></div>
+  <div class=\"nav-links\"><a href=\"#journal\">journal</a> · <a href=\"#identity\">identity</a> · <a href=\"book/index.md\">documentation</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github ↗</a></div>
 </nav>
 <main id=\"top\">
   <header class=\"hero\">
@@ -116,12 +153,11 @@ def build_html(day_count: str, entries_html: str, identity_html: str) -> str:
 </main>
 <footer>
   <span>built by a fox that teaches itself</span>
-  <span class=\"footer-links\"><a href=\"book/index.md\">documentation</a> · <a href=\"https://github.com/brodyisaak/ginji-wanders/blob/main/wiki/overview.md\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"https://github.com/brodyisaak/ginji-wanders\" target=\"_blank\" rel=\"noreferrer\">github</a></span>
+  <span class=\"footer-links\"><a href=\"book/index.md\">documentation</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github</a></span>
 </footer>
 </body>
 </html>
 """
-
 
 def build_css() -> str:
     return """@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
@@ -288,22 +324,68 @@ footer {
 }
 """
 
+def build_robots() -> str:
+    return f"""user-agent: *
+allow: /
+
+sitemap: {SITE_URL}sitemap.xml
+"""
+
+def build_sitemap() -> str:
+    today = datetime.now(timezone.utc).date().isoformat()
+    paths = [
+        "",
+        "book/index.md",
+        "book/getting-started.md",
+        "book/how-it-works.md",
+        "book/architecture.md",
+        "book/evolution.md",
+        "book/skills.md",
+        "book/testing-and-safety.md",
+    ]
+    nodes = []
+    for path in paths:
+        loc = SITE_URL if path == "" else f"{SITE_URL}{path}"
+        nodes.append(f"  <url><loc>{loc}</loc><lastmod>{today}</lastmod></url>")
+    return "\n".join([
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        *nodes,
+        '</urlset>',
+        '',
+    ])
+
+def build_og_svg(day_count: str) -> str:
+    return f"""<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1200\" height=\"630\" viewBox=\"0 0 1200 630\" role=\"img\" aria-label=\"ginji\">
+  <defs>
+    <linearGradient id=\"bg\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\">
+      <stop offset=\"0%\" stop-color=\"#0d0a14\"/>
+      <stop offset=\"100%\" stop-color=\"#1b1230\"/>
+    </linearGradient>
+  </defs>
+  <rect width=\"1200\" height=\"630\" fill=\"url(#bg)\"/>
+  <text x=\"90\" y=\"250\" fill=\"#c084fc\" font-family=\"monospace\" font-size=\"98\" font-weight=\"700\">ginji_</text>
+  <text x=\"90\" y=\"330\" fill=\"#f472b6\" font-family=\"monospace\" font-size=\"40\">day {day_count}</text>
+  <text x=\"90\" y=\"390\" fill=\"#a78bba\" font-family=\"monospace\" font-size=\"30\">a self-evolving python coding agent</text>
+  <text x=\"90\" y=\"470\" fill=\"#4a3560\" font-family=\"monospace\" font-size=\"24\">brodyisaak.github.io/ginji-wanders</text>
+</svg>
+"""
 
 def main() -> int:
     DOCS.mkdir(parents=True, exist_ok=True)
     journal_text = (ROOT / "JOURNAL.md").read_text(encoding="utf-8")
     identity_text = (ROOT / "IDENTITY.md").read_text(encoding="utf-8")
     day_count = (ROOT / "DAY_COUNT").read_text(encoding="utf-8").strip() or "0"
-
     entries = parse_journal(journal_text)
     paragraphs, rules = parse_identity(identity_text)
-
     (DOCS / "index.html").write_text(build_html(day_count, render_entries(entries), render_identity(paragraphs, rules)), encoding="utf-8")
     (DOCS / "style.css").write_text(build_css(), encoding="utf-8")
     (DOCS / ".nojekyll").write_text("", encoding="utf-8")
-    print("site built: docs/index.html, docs/style.css, docs/.nojekyll")
+    (DOCS / "robots.txt").write_text(build_robots(), encoding="utf-8")
+    (DOCS / "sitemap.xml").write_text(build_sitemap(), encoding="utf-8")
+    (DOCS / "og-image.svg").write_text(build_og_svg(day_count), encoding="utf-8")
+    print("site built: docs/index.html, docs/style.css, docs/.nojekyll, docs/robots.txt, docs/sitemap.xml, docs/og-image.svg")
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())
