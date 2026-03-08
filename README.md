@@ -53,7 +53,8 @@ wiki/
 
 - documentation: [docs/book/index.md](docs/book/index.md)
 - architecture wiki: [wiki/overview.md](wiki/overview.md)
-- site: [docs/index.html](docs/index.html)
+- site: [brodyisaak.github.io/ginji-wanders](https://brodyisaak.github.io/ginji-wanders/)
+- docs source: [docs/index.html](docs/index.html)
 - github: [github.com/brodyisaak/ginji-wanders](https://github.com/brodyisaak/ginji-wanders)
 
 ## license

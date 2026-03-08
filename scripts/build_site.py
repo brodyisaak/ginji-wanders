@@ -175,6 +175,7 @@ def build_css() -> str:
 }
 
 * { box-sizing: border-box; }
+html { scroll-padding-top: 96px; }
 
 body {
   margin: 0;
@@ -213,6 +214,8 @@ footer {
   margin: 0 auto;
   padding: 18px 16px;
 }
+
+section[id] { scroll-margin-top: 96px; }
 
 .hero h1 {
   margin: 8px 0 0;
@@ -312,6 +315,8 @@ footer {
 
 @media (max-width: 480px) {
   .hero h1 { font-size: 2.5rem; }
+  html { scroll-padding-top: 130px; }
+  section[id] { scroll-margin-top: 130px; }
   nav {
     flex-direction: column;
     align-items: flex-start;
@@ -375,15 +380,16 @@ def main() -> int:
     DOCS.mkdir(parents=True, exist_ok=True)
     journal_text = (ROOT / "JOURNAL.md").read_text(encoding="utf-8")
     identity_text = (ROOT / "IDENTITY.md").read_text(encoding="utf-8")
-    day_count = (ROOT / "DAY_COUNT").read_text(encoding="utf-8").strip() or "0"
     entries = parse_journal(journal_text)
+    day_count = (ROOT / "DAY_COUNT").read_text(encoding="utf-8").strip() or "0"
+    display_day = str(entries[0]["day"]) if entries else day_count
     paragraphs, rules = parse_identity(identity_text)
-    (DOCS / "index.html").write_text(build_html(day_count, render_entries(entries), render_identity(paragraphs, rules)), encoding="utf-8")
+    (DOCS / "index.html").write_text(build_html(display_day, render_entries(entries), render_identity(paragraphs, rules)), encoding="utf-8")
     (DOCS / "style.css").write_text(build_css(), encoding="utf-8")
     (DOCS / ".nojekyll").write_text("", encoding="utf-8")
     (DOCS / "robots.txt").write_text(build_robots(), encoding="utf-8")
     (DOCS / "sitemap.xml").write_text(build_sitemap(), encoding="utf-8")
-    (DOCS / "og-image.svg").write_text(build_og_svg(day_count), encoding="utf-8")
+    (DOCS / "og-image.svg").write_text(build_og_svg(display_day), encoding="utf-8")
     print("site built: docs/index.html, docs/style.css, docs/.nojekyll, docs/robots.txt, docs/sitemap.xml, docs/og-image.svg")
     return 0
 

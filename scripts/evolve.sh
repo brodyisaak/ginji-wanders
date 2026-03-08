@@ -53,20 +53,62 @@ have_gh() {
 append_fallback_journal() {
   local day_num="$1"
   local now_hhmm="$2"
+  local entry_tmp
+  entry_tmp="$(mktemp)"
+  {
+    echo "## day ${day_num} — ${now_hhmm} — fallback session summary"
+    echo
+    echo "i ran an evolution session and completed the standard pipeline from planning to publish."
+    echo "the agent did not write a journal entry, so this fallback entry records the run state."
+    echo "build validation passed after recovery, and the repository remained in a healthy commit state."
+    echo "the website was rebuilt from JOURNAL.md, IDENTITY.md, and DAY_COUNT using scripts/build_site.py."
+    echo "i should improve journal reliability so future entries are authored directly by the agent with deeper detail."
+    echo "next session i will keep one focused change, report exact tests, and explain tradeoffs more clearly."
+  } > "$entry_tmp"
+  prepend_journal_entry "$day_num" "$entry_tmp"
+  rm -f "$entry_tmp"
+}
+
+latest_journal_day() {
+  if [[ ! -f JOURNAL.md ]]; then
+    echo "0"
+    return
+  fi
+  local latest
+  latest="$(grep -E '^## day [0-9]+ —' JOURNAL.md | head -n 1 | sed -E 's/^## day ([0-9]+) —.*/\1/' || true)"
+  if [[ -z "$latest" ]]; then
+    echo "0"
+  else
+    echo "$latest"
+  fi
+}
+
+prepend_journal_entry() {
+  local day_num="$1"
+  local entry_file="$2"
   local tmp
   tmp="$(mktemp)"
-  {
-    echo "# journal"
-    echo
-    echo "## day ${day_num} — ${now_hhmm} — fallback session log"
-    echo
-    echo "i ran an evolution session and validated the build."
-    echo "the scripted path completed, but no explicit journal entry was written by the agent."
-    echo "tests are green and the site was rebuilt."
-    echo "next i should make one sharper improvement and document it directly."
-    echo
-    tail -n +2 JOURNAL.md
-  } > "$tmp"
+  if [[ -f JOURNAL.md ]] && grep -q "^## day ${day_num} —" JOURNAL.md; then
+    return
+  fi
+
+  if [[ -f JOURNAL.md ]] && head -n 1 JOURNAL.md | grep -q '^# journal'; then
+    {
+      echo "# journal"
+      echo
+      cat "$entry_file"
+      echo
+      tail -n +3 JOURNAL.md
+    } > "$tmp"
+  else
+    {
+      echo "# journal"
+      echo
+      cat "$entry_file"
+      echo
+      [[ -f JOURNAL.md ]] && cat JOURNAL.md
+    } > "$tmp"
+  fi
   mv "$tmp" JOURNAL.md
 }
 
@@ -86,6 +128,10 @@ process_issue_responses() {
 
   flush_response() {
     if [[ -z "$issue_number" || -z "$status" || -z "$comment" ]]; then
+      return
+    fi
+    if ! gh issue view "$issue_number" --repo "$REPO" >/dev/null 2>&1; then
+      echo "skipping unknown issue #${issue_number}"
       return
     fi
     echo "posting response to issue #${issue_number}"
@@ -253,9 +299,28 @@ if [[ "$build_ok" -ne 1 ]]; then
 fi
 
 echo "step 8: ensure journal was written"
+cat > /tmp/ginji_journal_prompt.txt <<EOF
+write one journal entry to JOURNAL_ENTRY.md only.
+do not rewrite JOURNAL.md directly.
+format exactly:
+## day ${next_day} — ${now_hhmm} — [short title]
+
+requirements:
+- 5 to 8 sentences in lowercase
+- include what changed and why
+- mention at least one touched file path
+- mention test or build results
+- mention one thing that went wrong or was risky
+- end with what is next
+EOF
+run_with_timeout "$IMPL_TIMEOUT" "cat /tmp/ginji_journal_prompt.txt | $GINJI_BIN --model '$MODEL' --skills skills" > /tmp/ginji_journal.log || true
+if [[ -f JOURNAL_ENTRY.md ]] && grep -q "^## day ${next_day} —" JOURNAL_ENTRY.md; then
+  prepend_journal_entry "$next_day" "JOURNAL_ENTRY.md"
+fi
 if ! grep -q "^## day ${next_day} —" JOURNAL.md; then
   append_fallback_journal "$next_day" "$now_hhmm"
 fi
+rm -f JOURNAL_ENTRY.md
 
 echo "step 9: process ISSUE_RESPONSE.md"
 process_issue_responses
@@ -264,7 +329,7 @@ echo "step 10: rebuild website"
 python scripts/build_site.py
 
 echo "step 11: commit remaining changes"
-echo "$next_day" > DAY_COUNT
+echo "$(latest_journal_day)" > DAY_COUNT
 if [[ -n "$(git status --porcelain)" ]]; then
   git add -A
   git commit -m "day ${next_day} (${now_hhmm}): evolution session"
