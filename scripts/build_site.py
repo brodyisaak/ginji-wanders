@@ -11,7 +11,7 @@ SITE_URL = "https://brodyisaak.github.io/ginji-wanders/"
 SITE_NAME = "ginji"
 SITE_DESC = "ginji is a self-evolving python coding agent that journals progress in public."
 GITHUB_URL = "https://github.com/brodyisaak/ginji-wanders"
-ARCH_WIKI_URL = f"{GITHUB_URL}/blob/main/wiki/overview.md"
+ARCH_WIKI_URL = f"{GITHUB_URL}/blob/main/wiki/index.md"
 
 def inline_format(text: str) -> str:
     clean = html.escape(text)

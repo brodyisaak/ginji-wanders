@@ -36,3 +36,8 @@ OPENAI_API_KEY=sk-... ./scripts/evolve.sh
 - git
 - gh cli
 - openai api key
+
+## deep wiki
+
+- [maintainer playbook](../../wiki/maintainer-playbook-local-ops.md)
+- [incident runbook](../../wiki/incident-runbook.md)

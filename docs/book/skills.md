@@ -13,3 +13,8 @@ bundled skills:
 - `self-assess`
 - `evolve`
 - `communicate`
+
+## deep wiki
+
+- [prompts and skills system](../../wiki/prompts-and-skills-system.md)
+- [contribution guidelines for agent safe changes](../../wiki/contribution-guidelines-for-agent-safe-changes.md)

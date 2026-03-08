@@ -1,15 +1,77 @@
 # evolution pipeline
 
-`scripts/evolve.sh` runs the autonomous loop end-to-end.
+## purpose
 
-1. preflight checks run `py_compile` and `pytest`
-2. issue collection pulls open issues and formats `ISSUES_TODAY.md`
-3. planning phase writes `SESSION_PLAN.md` with one focused improvement
-4. implementation loop executes up to five task attempts
-5. validation/recovery reruns build checks, attempts fixes, and can revert `src/` + `tests/`
-6. journal fallback prepends an entry if missing
-7. issue response handling posts comments and closes issues when status is fixed or wontfix
-8. site rebuild runs `python scripts/build_site.py`
-9. commit/tag/push finalizes the session
+document the exact autonomous session lifecycle in `scripts/evolve.sh`.
 
-`DAY_COUNT` tracks day progression, while `JOURNAL.md` stores the narrative memory of each day.
+## system boundaries
+
+in scope:
+- preflight validation
+- issue intake and planning
+- implementation loop
+- validation and fallback
+- journaling and learnings
+- site rebuild and publish
+
+out of scope:
+- manual contributor workflows not using `scripts/evolve.sh`
+
+## step-by-step flow
+
+1. verify environment and secrets.
+2. run preflight checks:
+   - `python -m py_compile src/ginji.py`
+   - `python -m pytest tests/ -q`
+3. enforce once-per-day guard using pacific date (`LAST_POST_DATE_PST`).
+4. fetch issue data and format `ISSUES_TODAY.md`.
+5. generate `SESSION_PLAN.md` through agent planning prompt.
+6. run implementation loop for up to five tasks.
+7. rerun build checks; auto-fix up to three attempts if needed.
+8. ensure journal entry exists, prepend fallback only when missing.
+9. ensure learning entry exists, prepend fallback only when missing.
+10. process `ISSUE_RESPONSE.md` if present.
+11. rebuild site via `python scripts/build_site.py`.
+12. write `DAY_COUNT` from latest journal day and persist `LAST_POST_DATE_PST`.
+13. commit, tag, and push.
+
+## what can go wrong
+
+- plan generation fails and leaves weak task guidance.
+- implementation modifies protected files indirectly.
+- build remains red after auto-fix loop.
+- journal or learnings entry generation fails.
+
+## diagnostics
+
+```bash
+bash -n scripts/evolve.sh
+rg -n "step [0-9]+|LAST_POST_DATE_PST|DAY_COUNT" scripts/evolve.sh
+cat SESSION_PLAN.md
+cat ISSUE_RESPONSE.md
+```
+
+## recovery actions
+
+- if validation fails repeatedly, restore `src/` and `tests/` and rerun checks.
+- if journal generation fails, prepend fallback entry and log root cause.
+- if issue processing fails, skip close/comment actions and preserve run health.
+
+## how to verify
+
+```bash
+python -m py_compile src/ginji.py
+python -m pytest tests/ -q
+python scripts/build_site.py
+```
+
+confirm:
+- `DAY_COUNT` matches newest journal day.
+- site reflects newest journal content.
+- only one post day increment per pacific day.
+
+## related pages
+
+- [github actions and scheduling](./github-actions-and-scheduling.md)
+- [tagging versioning and day count](./tagging-versioning-and-day-count.md)
+- [issue ingestion triage and response](./issue-ingestion-triage-and-response.md)

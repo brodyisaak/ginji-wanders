@@ -1,27 +1,81 @@
 # architecture
 
-## repl execution flow
+## purpose
 
-1. determine input path: stdin pipe, `--prompt`, or interactive prompt
-2. build system prompt from built-in text plus optional system and skills
-3. call openai api with function tools
-4. execute returned tool calls and append outputs
-5. loop until no tool calls remain, then print final response
+this page documents the runtime decomposition and why ginji stays intentionally small.
 
-## input paths
+## system boundaries
 
-- stdin piped content is used first when present
-- `--prompt` is used for single-shot tasks when no piped input exists
-- interactive mode starts when neither source is provided
+primary runtime units:
+- cli and repl orchestration
+- prompt composition
+- tool contract definitions
+- tool execution loop
+- usage reporting
 
-## tool execution loop
+supporting units:
+- autonomous runner script
+- static site builder
+- workflow automation
 
-ginji dispatches tool calls by name, parses json args, executes local functions, returns string outputs, and handles malformed arguments safely.
+## component map
 
-## skills loading
+1. `src/ginji.py`
+   - parses cli flags
+   - builds system prompt
+   - defines tool schema and dispatch map
+   - runs openai tool-call loop
+2. `scripts/evolve.sh`
+   - orchestrates autonomous sessions and git publishing
+3. `scripts/build_site.py`
+   - renders docs site from state files
+4. `tests/test_ginji.py`
+   - validates local tool behavior
 
-`--skills` enables recursive discovery of `SKILL.md` files. frontmatter metadata and body text are concatenated and prepended into the system prompt.
+## step-by-step flow
 
-## design intent
+1. parse runtime inputs and determine execution mode.
+2. load optional skills and merge prompt layers.
+3. call openai api with available function tools.
+4. execute tools with local filesystem and shell access.
+5. append tool outputs back into conversation state.
+6. continue until model returns no tool calls.
+7. print final response and optional token usage.
 
-ginji is intentionally small and functional to keep behavior inspectable and easy to evolve. `src/ginji.py` remains the core runtime.
+## design constraints
+
+- functional style over class hierarchy.
+- all tool results return strings, including errors.
+- normal tool failures should not crash repl.
+- minimal dependencies: openai sdk and pytest.
+
+## what can go wrong
+
+- malformed tool json can break dispatch if not guarded.
+- tool functions may diverge from tests.
+- prompt layer ordering can become inconsistent.
+
+## diagnostics
+
+```bash
+rg -n "def (bash_exec|read_file|write_file|edit_file|list_files|search_files)" src/ginji.py
+rg -n "--skills|system prompt|tool" src/ginji.py
+python -m pytest tests/test_ginji.py -v
+```
+
+## recovery actions
+
+- restore contract behavior by aligning tool implementations with test expectations.
+- if prompt composition regresses, compare against known-good commit and update tests.
+
+## how to verify
+
+- every tool function is importable and tested.
+- repl mode still runs with no prompt argument.
+- piped input still executes single-shot tasks.
+
+## related pages
+
+- [runtime loop and message flow](./runtime-loop-and-message-flow.md)
+- [tools contracts and failure modes](./tools-contracts-and-failure-modes.md)
+- [testing and safety](./testing-and-safety.md)

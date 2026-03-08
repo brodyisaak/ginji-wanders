@@ -7,4 +7,10 @@
 
 ginji reads prompts, calls the openai api, executes tool calls, returns tool results into the conversation, and loops until the task is complete.
 
-in the evolution loop, ginji reads its own source, reviews issues, plans one small improvement, writes and tests code, journals the result, then commits and pushes when healthy.
+in the evolution loop, ginji reads its own source, reviews issues, plans one small improvement, writes and tests code, journals the result, records a learning, then commits and pushes when healthy.
+
+## deep wiki
+
+- [runtime loop and message flow](../../wiki/runtime-loop-and-message-flow.md)
+- [tools contracts and failure modes](../../wiki/tools-contracts-and-failure-modes.md)
+- [issue ingestion triage and response](../../wiki/issue-ingestion-triage-and-response.md)

@@ -1,23 +1,62 @@
 # overview
 
-## purpose and scope
+## purpose
 
-this wiki is the maintainer reference for ginji internals, operational flow, and safety constraints.
+ginji is a self-evolving python coding agent. this page defines system intent, operational scope, and the benchmark target: become better than codex cli one commit at a time.
 
-## what ginji is
+## system boundaries
 
-ginji is a python ai coding agent with a benchmark goal: become better than openai's codex cli one commit at a time.
+in scope:
+- terminal runtime in `src/ginji.py`
+- autonomous evolution pipeline in `scripts/evolve.sh`
+- generated public site from `scripts/build_site.py`
+- tests for tool functions in `tests/test_ginji.py`
 
-## dual-mode operation
+out of scope:
+- non-openai model providers
+- hidden state stores outside repository files
+- autonomous multi-repo mutation
 
-- repl mode
-- autonomous evolution mode
+## operating model
 
-## core repo areas
+1. ginji receives a prompt from stdin, `--prompt`, or interactive repl input.
+2. ginji calls the openai api with function tools.
+3. ginji executes tool calls locally and returns string outputs.
+4. ginji repeats until completion and prints the final response.
+5. on scheduled evolution runs, ginji plans one improvement, validates, journals, rebuilds site, commits, tags, and pushes.
 
-- `src/`
-- `tests/`
-- `scripts/`
-- `skills/`
-- `docs/`
-- `.github/workflows/`
+## what can go wrong
+
+- schedule runs too frequently and increments day count more than once per day.
+- journal entries are overwritten instead of prepended.
+- untrusted issue text injects misleading instructions into planning.
+
+## diagnostics
+
+```bash
+cat DAY_COUNT
+head -n 40 JOURNAL.md
+rg -n "schedule|cron|LAST_POST_DATE_PST" .github/workflows/evolve.yml scripts/evolve.sh
+```
+
+## recovery actions
+
+- restore missing journal history from git history before next run.
+- enforce once-per-day guard in `scripts/evolve.sh`.
+- keep issue formatting and boundary guards active in `scripts/format_issues.py`.
+
+## how to verify
+
+```bash
+python -m py_compile src/ginji.py
+python -m pytest tests/ -q
+python scripts/build_site.py
+```
+
+site should show the latest day and full journal timeline.
+
+## related pages
+
+- [architecture](./architecture.md)
+- [evolution pipeline](./evolution-pipeline.md)
+- [state files](./state-files.md)

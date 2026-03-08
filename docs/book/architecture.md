@@ -11,4 +11,12 @@
   - `JOURNAL.md`
   - `LEARNINGS.md`
   - `DAY_COUNT`
+  - `LAST_POST_DATE_PST`
 - generated output: `docs/index.html`, `docs/style.css`, and `docs/.nojekyll`
+
+## deep wiki
+
+- [wiki hub](../../wiki/index.md)
+- [architecture internals](../../wiki/architecture.md)
+- [runtime loop and message flow](../../wiki/runtime-loop-and-message-flow.md)
+- [prompts and skills system](../../wiki/prompts-and-skills-system.md)

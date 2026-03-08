@@ -113,6 +113,53 @@ prepend_journal_entry() {
   mv "$tmp" JOURNAL.md
 }
 
+restore_missing_journal_history() {
+  local before_file="$1"
+  if [[ ! -f "$before_file" || ! -f JOURNAL.md ]]; then
+    return
+  fi
+  python - "$before_file" JOURNAL.md <<'PY'
+import re
+import sys
+from pathlib import Path
+
+before_path = Path(sys.argv[1])
+after_path = Path(sys.argv[2])
+
+before = before_path.read_text(encoding="utf-8")
+after = after_path.read_text(encoding="utf-8")
+
+pattern = re.compile(r"(^## day\s+\d+\s+—.*?)(?=^## day\s+\d+\s+—|\Z)", re.M | re.S)
+day_header = re.compile(r"^## day\s+(\d+)\s+—", re.M)
+
+def parse_entries(text: str):
+    entries = {}
+    for block in pattern.findall(text):
+        match = day_header.search(block)
+        if not match:
+            continue
+        day_num = int(match.group(1))
+        entries[day_num] = block.strip()
+    return entries
+
+before_entries = parse_entries(before)
+after_entries = parse_entries(after)
+
+missing = [d for d in before_entries if d not in after_entries]
+if not missing:
+    print("journal history check: no missing days")
+    raise SystemExit(0)
+
+merged_days = sorted(set(before_entries) | set(after_entries), reverse=True)
+merged_blocks = [after_entries.get(day, before_entries.get(day, "")).strip() for day in merged_days]
+merged_blocks = [b for b in merged_blocks if b]
+
+output = "# journal\n\n" + "\n\n".join(merged_blocks).rstrip() + "\n"
+after_path.write_text(output, encoding="utf-8")
+print(f"journal history restored: added {len(missing)} missing day entries")
+PY
+}
+
 prepend_learnings_entry() {
   local day_num="$1"
   local entry_file="$2"
@@ -246,6 +293,12 @@ fi
 if [[ "$last_post_pst" == "$today_pst" ]]; then
   echo "already posted today in pacific time (${today_pst}); skipping."
   exit 0
+fi
+journal_history_snapshot="$(mktemp)"
+if [[ -f JOURNAL.md ]]; then
+  cp JOURNAL.md "$journal_history_snapshot"
+else
+  echo "# journal" > "$journal_history_snapshot"
 fi
 
 echo "step 0: verify build"
@@ -389,6 +442,8 @@ fi
 if ! grep -q "^## day ${next_day} —" JOURNAL.md; then
   append_fallback_journal "$next_day" "$now_hhmm"
 fi
+echo "step 8c: restore missing journal history if needed"
+restore_missing_journal_history "$journal_history_snapshot"
 rm -f JOURNAL_ENTRY.md
 
 echo "step 8b: ensure learnings were written"
@@ -416,6 +471,7 @@ echo "step 10: rebuild website"
 python scripts/build_site.py
 
 echo "step 11: commit remaining changes"
+rm -f "$journal_history_snapshot"
 echo "$(latest_journal_day)" > DAY_COUNT
 echo "$today_pst" > LAST_POST_DATE_PST
 if [[ -n "$(git status --porcelain)" ]]; then

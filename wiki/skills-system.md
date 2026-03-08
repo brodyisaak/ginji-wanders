@@ -1,20 +1,7 @@
 # skills system
 
-## representation
+this page was replaced by a deeper reference:
 
-a skill is a `SKILL.md` file with yaml frontmatter and markdown instructions.
-
-## yaml frontmatter
-
-supported fields:
-- `name`
-- `description`
-- `tools`
-
-## parsing and concatenation
-
-ginji reads each skill file, parses frontmatter, keeps instruction body, and concatenates all discovered skills into a single prepended system-context block.
-
-## why this matters
-
-skills constrain and guide autonomous changes so evolution stays aligned with mission, safety rules, and repo conventions.
+- [prompts and skills system](./prompts-and-skills-system.md)
+- [runtime loop and message flow](./runtime-loop-and-message-flow.md)
+- [contribution guidelines for agent safe changes](./contribution-guidelines-for-agent-safe-changes.md)

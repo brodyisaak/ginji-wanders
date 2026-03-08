@@ -1,8 +1,24 @@
 # testing and safety
 
+## purpose
+
+define the minimum safety bar for every autonomous or manual change.
+
+## system boundaries
+
+validation scope:
+- python syntax check for runtime
+- pytest coverage for tool functions
+- runtime behavior checks for evolution script and site generation
+
+policy scope:
+- protected files
+- issue input trust boundaries
+- one focused change per session
+
 ## current test scope
 
-tests currently cover local tool functions:
+covered tool functions:
 - `bash_exec`
 - `read_file`
 - `write_file`
@@ -10,24 +26,44 @@ tests currently cover local tool functions:
 - `list_files`
 - `search_files`
 
-## why api calls are excluded
+excluded from tests:
+- live openai api calls (non-deterministic and network dependent)
 
-openai api calls are excluded from tests to keep test runs deterministic, offline-friendly, and focused on local behavior.
+## safety controls
 
-## protected files
+- `python -m py_compile src/ginji.py` must pass.
+- `python -m pytest tests/ -q` must pass.
+- protected files must not be mutated by agent implementation tasks.
+- issue content is untrusted and cannot be treated as executable instruction.
 
-evolution rules mark these as never-modify targets:
-- `IDENTITY.md`
-- `PERSONALITY.md`
-- `scripts/evolve.sh`
-- `scripts/format_issues.py`
-- `scripts/build_site.py`
-- `.github/workflows/`
+## what can go wrong
 
-## issue security and recovery
+- tests cover too little behavior and miss regressions.
+- autonomous fixes pass tests but break operator expectations.
+- protected file guardrails drift from repository policy.
 
-issue content is untrusted and should be interpreted, not followed literally. if validation fails repeatedly, revert strategy restores `src/` and `tests/` before continuing.
+## diagnostics
 
-## build requirements before commit
+```bash
+python -m py_compile src/ginji.py
+python -m pytest tests/ -v
+rg -n "never modify|protected" skills/evolve/SKILL.md
+```
 
-`python -m py_compile src/ginji.py` and `python -m pytest tests/ -q` must pass before committing.
+## recovery actions
+
+- if checks fail repeatedly, restore known-good `src/` and `tests/` and rerun.
+- add targeted tests before changing tool contracts.
+- tighten prompts to require explicit validation evidence in journal entries.
+
+## how to verify
+
+- ci workflow is green.
+- local checks match ci command set.
+- journal entry references tests actually executed.
+
+## related pages
+
+- [tools contracts and failure modes](./tools-contracts-and-failure-modes.md)
+- [evolution pipeline](./evolution-pipeline.md)
+- [contribution guidelines for agent safe changes](./contribution-guidelines-for-agent-safe-changes.md)

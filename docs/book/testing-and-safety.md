@@ -7,3 +7,9 @@
 - each session targets one focused change
 - if build health fails repeatedly, revert strategy is available
 - journaling is mandatory and should be honest about outcomes
+
+## deep wiki
+
+- [testing and safety](../../wiki/testing-and-safety.md)
+- [tools contracts and failure modes](../../wiki/tools-contracts-and-failure-modes.md)
+- [incident runbook](../../wiki/incident-runbook.md)

@@ -4,13 +4,38 @@ a coding agent that teaches itself
 
 ginji is a python coding agent that reads code, runs tools, and iterates on its own repository. it is intentionally small, transparent, and designed to evolve in public.
 
+website · documentation · github · deep wiki
+
+- website: [brodyisaak.github.io/ginji-wanders](https://brodyisaak.github.io/ginji-wanders/)
+- documentation: [docs/book/index.md](docs/book/index.md)
+- github: [github.com/brodyisaak/ginji-wanders](https://github.com/brodyisaak/ginji-wanders)
+- deep wiki: [wiki/index.md](wiki/index.md)
+
+## what ginji is
+
+ginji started as a compact python cli agent and keeps improving itself in small, test-backed increments. it is designed to stay understandable: one core runtime, explicit tool contracts, plain markdown memory, and visible commits.
+
+the benchmark is practical developer utility: can someone trust ginji for real coding work in a live repo.
+
 ## evolution loop
 
-github actions runs ginji every 6 hours. in each session ginji reads itself, picks one small improvement, implements it, tests it, journals it, rebuilds the site, and pushes updates when healthy.
+github actions runs ginji on a daily schedule with pacific-time guardrails. in each session ginji:
+
+1. reads its own source and memory files
+2. reviews issue input and writes a session plan
+3. implements one focused improvement
+4. runs compile + tests
+5. writes journal and learnings entries
+6. rebuilds the site
+7. commits, tags, and pushes if healthy
 
 ## how it works
 
-ginji runs in two modes: interactive repl and autonomous evolution. in repl mode it accepts prompts and executes tool calls (bash, file io, listing, and search) through the openai api. in evolution mode it follows `scripts/evolve.sh`, checks issues, writes a plan, performs one focused improvement, validates with tests, updates the journal, and publishes.
+ginji runs in two modes: interactive repl and autonomous evolution. in repl mode it accepts prompts and executes tool calls (bash, file io, listing, and search) through the openai api. in evolution mode it follows `scripts/evolve.sh`, checks issues, writes a plan, performs one focused improvement, validates with tests, updates state files, and publishes.
+
+## talk to ginji
+
+open an issue with the `agent-input` label. clear, specific issue reports help the agent prioritize meaningful work.
 
 ## how to run it locally
 
@@ -25,10 +50,6 @@ OPENAI_API_KEY=sk-... python src/ginji.py
 OPENAI_API_KEY=sk-... ./scripts/evolve.sh
 ```
 
-## how to talk to it
-
-open a github issue with label `agent-input`.
-
 ## labels
 
 | label | purpose |
@@ -36,6 +57,24 @@ open a github issue with label `agent-input`.
 | `agent-input` | external requests and user-facing suggestions for ginji |
 | `agent-self` | self-discovered improvements ginji should tackle later |
 | `agent-help-wanted` | blocked items where ginji needs human help |
+
+## project memory and state
+
+- `IDENTITY.md`: mission and operating rules
+- `PERSONALITY.md`: voice and style boundaries
+- `JOURNAL.md`: day-by-day execution record
+- `LEARNINGS.md`: daily practical lessons
+- `DAY_COUNT`: current day number
+- `LAST_POST_DATE_PST`: pacific schedule guard
+
+## maintainer deep wiki
+
+- [wiki hub](wiki/index.md)
+- [runtime loop and message flow](wiki/runtime-loop-and-message-flow.md)
+- [tools contracts and failure modes](wiki/tools-contracts-and-failure-modes.md)
+- [evolution pipeline](wiki/evolution-pipeline.md)
+- [incident runbook](wiki/incident-runbook.md)
+- [maintainer playbook](wiki/maintainer-playbook-local-ops.md)
 
 ## architecture tree
 
@@ -51,9 +90,13 @@ wiki/
 
 ## links
 
-- documentation: [docs/book/index.md](docs/book/index.md)
-- architecture wiki: [wiki/overview.md](wiki/overview.md)
 - site: [brodyisaak.github.io/ginji-wanders](https://brodyisaak.github.io/ginji-wanders/)
+- documentation: [docs/book/index.md](docs/book/index.md)
+- deep wiki hub: [wiki/index.md](wiki/index.md)
+- architecture internals: [wiki/architecture.md](wiki/architecture.md)
+- runtime loop: [wiki/runtime-loop-and-message-flow.md](wiki/runtime-loop-and-message-flow.md)
+- evolution pipeline: [wiki/evolution-pipeline.md](wiki/evolution-pipeline.md)
+- testing and safety: [wiki/testing-and-safety.md](wiki/testing-and-safety.md)
 - docs source: [docs/index.html](docs/index.html)
 - github: [github.com/brodyisaak/ginji-wanders](https://github.com/brodyisaak/ginji-wanders)
 
