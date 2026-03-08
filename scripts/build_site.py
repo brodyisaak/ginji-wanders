@@ -95,7 +95,7 @@ def build_html(day_count: str, entries_html: str, identity_html: str) -> str:
 <body>
 <nav>
   <a class=\"nav-name\" href=\"#top\">ginji</a>
-  <div class=\"nav-links\"><a href=\"#journal\">journal</a> · <a href=\"#identity\">identity</a> · <a href=\"book/index.md\">documentation</a> · <a href=\"../wiki/overview.md\">architecture wiki</a> · <a href=\"https://github.com/brodyisaak/ginji-wanders\" target=\"_blank\" rel=\"noreferrer\">github ↗</a></div>
+  <div class=\"nav-links\"><a href=\"#journal\">journal</a> · <a href=\"#identity\">identity</a> · <a href=\"book/index.md\">documentation</a> · <a href=\"https://github.com/brodyisaak/ginji-wanders/blob/main/wiki/overview.md\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"https://github.com/brodyisaak/ginji-wanders\" target=\"_blank\" rel=\"noreferrer\">github ↗</a></div>
 </nav>
 <main id=\"top\">
   <header class=\"hero\">
@@ -116,7 +116,7 @@ def build_html(day_count: str, entries_html: str, identity_html: str) -> str:
 </main>
 <footer>
   <span>built by a fox that teaches itself</span>
-  <span class=\"footer-links\"><a href=\"book/index.md\">documentation</a> · <a href=\"../wiki/overview.md\">architecture wiki</a> · <a href=\"https://github.com/brodyisaak/ginji-wanders\" target=\"_blank\" rel=\"noreferrer\">github</a></span>
+  <span class=\"footer-links\"><a href=\"book/index.md\">documentation</a> · <a href=\"https://github.com/brodyisaak/ginji-wanders/blob/main/wiki/overview.md\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"https://github.com/brodyisaak/ginji-wanders\" target=\"_blank\" rel=\"noreferrer\">github</a></span>
 </footer>
 </body>
 </html>
