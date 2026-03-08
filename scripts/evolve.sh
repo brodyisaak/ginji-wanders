@@ -237,7 +237,16 @@ if ! [[ "$current_day" =~ ^[0-9]+$ ]]; then
   current_day="0"
 fi
 next_day="$((current_day + 1))"
-now_hhmm="$(date +%H:%M)"
+now_hhmm="$(TZ=America/Los_Angeles date +%H:%M)"
+today_pst="$(TZ=America/Los_Angeles date +%Y-%m-%d)"
+last_post_pst=""
+if [[ -f LAST_POST_DATE_PST ]]; then
+  last_post_pst="$(tr -d '[:space:]' < LAST_POST_DATE_PST)"
+fi
+if [[ "$last_post_pst" == "$today_pst" ]]; then
+  echo "already posted today in pacific time (${today_pst}); skipping."
+  exit 0
+fi
 
 echo "step 0: verify build"
 bash -lc "$BUILD_CHECK"
@@ -408,6 +417,7 @@ python scripts/build_site.py
 
 echo "step 11: commit remaining changes"
 echo "$(latest_journal_day)" > DAY_COUNT
+echo "$today_pst" > LAST_POST_DATE_PST
 if [[ -n "$(git status --porcelain)" ]]; then
   git add -A
   git commit -m "day ${next_day} (${now_hhmm}): evolution session"

@@ -52,13 +52,18 @@ def parse_identity(text: str):
             rules.append(m.group(1).strip())
     return paragraphs, rules
 
-def render_entries(entries):
+def render_entries(entries, visible_limit: int = 5):
     parts = []
-    for entry in entries:
+    hidden_count = 0
+    for idx, entry in enumerate(entries):
+        classes = "entry"
+        if idx >= visible_limit:
+            classes += " entry-hidden"
+            hidden_count += 1
         parts.append(
             "\n".join(
                 [
-                    '<article class="entry">',
+                    f'<article class="{classes}">',
                     '  <div class="entry-marker"></div>',
                     '  <div class="entry-content">',
                     f'    <span class="entry-day">day {entry["day"]}</span>',
@@ -69,7 +74,7 @@ def render_entries(entries):
                 ]
             )
         )
-    return "\n".join(parts)
+    return "\n".join(parts), hidden_count
 
 def render_identity(paragraphs, rules):
     blocks = []
@@ -100,11 +105,30 @@ def build_structured_data(day_count: str) -> str:
     }
     return json.dumps(payload, separators=(",", ":"))
 
-def build_html(day_count: str, entries_html: str, identity_html: str) -> str:
+def build_html(day_count: str, entries_html: str, hidden_count: int, identity_html: str) -> str:
     canonical = SITE_URL
     og_image = f"{SITE_URL}og-image.svg"
     title = "ginji | self-evolving python coding agent"
     structured = build_structured_data(day_count)
+    show_more_button = (
+        f'<button id="show-more" class="show-more" type="button">show more ({hidden_count})</button>'
+        if hidden_count > 0
+        else ""
+    )
+    show_more_script = """
+<script>
+  (function () {
+    const button = document.getElementById("show-more");
+    if (!button) return;
+    button.addEventListener("click", function () {
+      document.querySelectorAll(".entry-hidden").forEach(function (node) {
+        node.classList.remove("entry-hidden");
+      });
+      button.remove();
+    });
+  })();
+</script>
+""" if hidden_count > 0 else ""
     return f"""<!doctype html>
 <html lang=\"en\">
 <head>
@@ -144,6 +168,7 @@ def build_html(day_count: str, entries_html: str, identity_html: str) -> str:
   <section id=\"journal\">
     <h2 class=\"section-label\">// journal</h2>
     <div class=\"timeline\">{entries_html}</div>
+    {show_more_button}
   </section>
 
   <section id=\"identity\">
@@ -155,6 +180,7 @@ def build_html(day_count: str, entries_html: str, identity_html: str) -> str:
   <span>built by a fox that teaches itself</span>
   <span class=\"footer-links\"><a href=\"book/index.md\">documentation</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github</a></span>
 </footer>
+{show_more_script}
 </body>
 </html>
 """
@@ -263,6 +289,19 @@ section[id] { scroll-margin-top: 96px; }
   position: relative;
   margin-bottom: 20px;
 }
+.entry-hidden { display: none; }
+
+.show-more {
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--purple);
+  padding: 8px 12px;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.show-more:hover { color: var(--pink); border-color: var(--pink); }
 
 .entry-marker {
   width: 7px;
@@ -384,7 +423,8 @@ def main() -> int:
     day_count = (ROOT / "DAY_COUNT").read_text(encoding="utf-8").strip() or "0"
     display_day = str(entries[0]["day"]) if entries else day_count
     paragraphs, rules = parse_identity(identity_text)
-    (DOCS / "index.html").write_text(build_html(display_day, render_entries(entries), render_identity(paragraphs, rules)), encoding="utf-8")
+    entries_html, hidden_count = render_entries(entries)
+    (DOCS / "index.html").write_text(build_html(display_day, entries_html, hidden_count, render_identity(paragraphs, rules)), encoding="utf-8")
     (DOCS / "style.css").write_text(build_css(), encoding="utf-8")
     (DOCS / ".nojekyll").write_text("", encoding="utf-8")
     (DOCS / "robots.txt").write_text(build_robots(), encoding="utf-8")

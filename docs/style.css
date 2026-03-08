@@ -101,6 +101,19 @@ section[id] { scroll-margin-top: 96px; }
   position: relative;
   margin-bottom: 20px;
 }
+.entry-hidden { display: none; }
+
+.show-more {
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--purple);
+  padding: 8px 12px;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.show-more:hover { color: var(--pink); border-color: var(--pink); }
 
 .entry-marker {
   width: 7px;
