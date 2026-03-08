@@ -10,3 +10,5 @@ SESSION_PLAN.md
 *.log
 .DS_Store
 /tmp/
+
+.pytest_cache/

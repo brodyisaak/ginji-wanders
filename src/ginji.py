@@ -14,40 +14,17 @@ DEFAULT_SYSTEM_PROMPT = (
     "avoid risky assumptions, and explain tradeoffs briefly."
 )
 def bash_exec(command: str) -> str:
-    import os
-
     try:
         r = subprocess.run(command, shell=True, capture_output=True, text=True)
         if r.returncode != 0:
             return f"error: command '{command}' failed with exit code {r.returncode}. stderr: {r.stderr.strip() or 'no error message'} (check if the command is valid or if you have sufficient permissions)"
         return (r.stdout or '') + (r.stderr or '')
-    except FileNotFoundError as fnf_error:
+    except FileNotFoundError:
         return f'error: command not found: {command} (check if it\'s spelled correctly or installed)'
-    except PermissionError as perm_error:
+    except PermissionError:
         return f'error: permission denied for command: {command} (check your access rights)'
     except Exception as e:
         return f"error: '{command}' encountered an unexpected issue: {e}"
-    try:
-        r = subprocess.run(command, shell=True, capture_output=True, text=True)
-        return (r.stdout or '') + (r.stderr or '')
-    except Exception as e:
-        return f"error: failed to run command '{command}': {e}"
-    import os
-
-    try:
-        r = subprocess.run(command, shell=True, capture_output=True, text=True)
-        return (r.stdout or "") + (r.stderr or "")
-    except FileNotFoundError as fnf_error:
-        return f'file not found: {fnf_error}'
-    except PermissionError as perm_error:
-        return f'permission denied: {perm_error}'
-    except Exception as e:
-        return f'an error occurred: {e}'
-    try:
-        r = subprocess.run(command, shell=True, capture_output=True, text=True)
-        return (r.stdout or "") + (r.stderr or "")
-    except Exception as e:
-        return f"error: failed to run command: {e}"
 def read_file(path: str) -> str:
     try:
         p = Path(path)
