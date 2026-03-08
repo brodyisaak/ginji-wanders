@@ -1,0 +1,62 @@
+name: evolution
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: setup github cli
+        run: gh auth status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+      - name: configure git
+        run: |
+          git config user.name "ginji-wanders[bot]"
+          git config user.email "ginji-wanders[bot]@users.noreply.github.com"
+      - name: run evolution (attempt 1)
+        id: attempt1
+        continue-on-error: true
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && 'true' || '' }}
+        run: chmod +x scripts/evolve.sh && ./scripts/evolve.sh
+      - name: retry after 15min
+        id: attempt2
+        if: steps.attempt1.outcome == 'failure'
+        continue-on-error: true
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && 'true' || '' }}
+        run: sleep 900 && ./scripts/evolve.sh
+      - name: retry after 45min
+        if: steps.attempt1.outcome == 'failure' && steps.attempt2.outcome == 'failure'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && 'true' || '' }}
+        run: sleep 2700 && ./scripts/evolve.sh
