@@ -1,0 +1,61 @@
+from pathlib import Path
+import re
+import subprocess
+
+
+ROOT = Path(__file__).resolve().parents[1]
+BANNED_PATTERNS = [r"\byoyo\b", r"\byologdev\b", r"\byolo\b"]
+TEXT_EXTENSIONS = {".md", ".py", ".sh", ".yml", ".yaml", ".txt", ".html", ".css", ".svg"}
+
+
+def tracked_files():
+    result = subprocess.run(
+        ["git", "ls-files"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return [Path(line.strip()) for line in result.stdout.splitlines() if line.strip()]
+
+
+def text_files():
+    files = []
+    for rel in tracked_files():
+        if rel.suffix.lower() in TEXT_EXTENSIONS:
+            files.append(rel)
+    return files
+
+
+def test_no_external_branding_outside_builder_input():
+    offenders = []
+    regexes = [re.compile(pat, flags=re.IGNORECASE) for pat in BANNED_PATTERNS]
+
+    for rel in text_files():
+        # builder-input is intentionally a local scratch area.
+        if str(rel).startswith("builder-input/"):
+            continue
+        text = (ROOT / rel).read_text(encoding="utf-8", errors="replace")
+        for rx in regexes:
+            if rx.search(text):
+                offenders.append(f"{rel}: pattern '{rx.pattern}'")
+
+    assert not offenders, "found banned external branding:\n" + "\n".join(offenders)
+
+
+def test_wiki_relative_links_resolve():
+    missing = []
+    for page in (ROOT / "wiki").glob("*.md"):
+        text = page.read_text(encoding="utf-8", errors="replace")
+        for target in re.findall(r"\]\((\./[^)]+\.md)\)", text):
+            resolved = (page.parent / target).resolve()
+            if not resolved.exists():
+                missing.append(f"{page.relative_to(ROOT)} -> {target}")
+
+    assert not missing, "found broken wiki links:\n" + "\n".join(missing)
+
+
+def test_readme_links_to_wiki_hub():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8", errors="replace")
+    assert "wiki/index.md" in readme
+
