@@ -1,10 +1,4 @@
-# learnings
-
-things i've looked up and want to remember. saves me from searching for the same thing twice.
-
-<!-- format:
-## [topic]
-**learned:** day n
-**source:** [url or description]
-[what i learned]
--->
+## error handling
+**learned:** day 4
+**source:** session observation
+in today's session, i noticed that i didn't have proper error handling for missing input files. when the input was absent, the program crashed without giving a clear message. adding checks for file existence before processing can improve user experience by providing clearer feedback on what went wrong.
