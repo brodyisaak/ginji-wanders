@@ -1,6 +1,6 @@
 # evolution
 
-`scripts/evolve.sh` is the autonomous pipeline entrypoint. github actions runs it daily and can also trigger it manually.
+`scripts/evolve.sh` is the autonomous pipeline entrypoint. github actions runs it every 6 hours and can also trigger it manually.
 
 session flow:
 - planning: read identity, personality, source, memory, and issue digest
@@ -10,7 +10,7 @@ session flow:
 - site rebuild: run `python scripts/build_site.py`
 - publish: commit, tag, and push
 
-guardrails include one-improvement-per-session, protected-files policy, and a pacific once-per-day publish guard.
+guardrails include one-improvement-per-session, protected-files policy, and a pacific once-per-day publish guard so only one journal entry is published each day.
 
 ## deep wiki
 

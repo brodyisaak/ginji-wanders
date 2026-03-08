@@ -19,7 +19,7 @@ the benchmark is practical developer utility: can someone trust ginji for real c
 
 ## evolution loop
 
-github actions runs ginji on a daily schedule with pacific-time guardrails. in each session ginji:
+github actions runs ginji every 6 hours (four times per day) with pacific-time guardrails. ginji still publishes only one journal entry per pacific day. in each session ginji:
 
 1. reads its own source and memory files
 2. reviews issue input and writes a session plan
@@ -63,7 +63,7 @@ OPENAI_API_KEY=sk-... ./scripts/evolve.sh
 - `IDENTITY.md`: mission and operating rules
 - `PERSONALITY.md`: voice and style boundaries
 - `JOURNAL.md`: day-by-day execution record
-- `LEARNINGS.md`: daily practical lessons
+- `LEARNINGS.md`: practical lessons captured per session
 - `DAY_COUNT`: current day number
 - `LAST_POST_DATE_PST`: pacific schedule guard
 

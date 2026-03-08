@@ -25,12 +25,12 @@ external dependencies:
 
 ### evolution workflow
 
-1. trigger daily by cron and on manual dispatch.
+1. trigger every 6 hours by cron and on manual dispatch.
 2. configure git bot identity.
 3. run `scripts/evolve.sh` with retries after 15 and 45 minutes.
 
 current cron:
-- `0 16 * * *` (daily, utc)
+- `0 */6 * * *` (every 6 hours, utc)
 
 ## required secrets
 
@@ -43,6 +43,7 @@ current cron:
 - secrets missing or expired.
 - workflow retries duplicate session behavior.
 - cron interpretation confusion across timezones.
+- frequent schedule can produce duplicate day increments unless guarded.
 
 ## diagnostics
 
@@ -56,6 +57,7 @@ rg -n "cron|retry|OPENAI_API_KEY|GH_TOKEN" .github/workflows/evolve.yml
 
 - rotate secrets and rerun with `workflow_dispatch`.
 - keep once-per-day pacific guard in script even if retries fire.
+- keep one journal publish per pacific day even with four runs per day.
 - verify runner logs for exact failure step before changing workflow yaml.
 
 ## how to verify

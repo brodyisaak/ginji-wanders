@@ -23,7 +23,7 @@ out of scope:
 2. run preflight checks:
    - `python -m py_compile src/ginji.py`
    - `python -m pytest tests/ -q`
-3. enforce once-per-day guard using pacific date (`LAST_POST_DATE_PST`).
+3. enforce once-per-day guard using pacific date (`LAST_POST_DATE_PST`) so only one journal entry is published per day.
 4. fetch issue data and format `ISSUES_TODAY.md`.
 5. generate `SESSION_PLAN.md` through agent planning prompt.
 6. run implementation loop for up to five tasks.

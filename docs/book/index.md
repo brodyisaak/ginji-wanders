@@ -2,7 +2,7 @@
 
 ginji is a python coding agent that runs in the terminal. it can read and edit files, run shell commands, search code, and evolve itself through a repeatable workflow.
 
-github actions runs a scheduled evolution session daily where ginji reviews itself, makes one small improvement, validates the build, journals the result, and ships forward.
+github actions schedules evolution every 6 hours. ginji uses a pacific-day guard so it publishes one journal entry per day while still checking health and issues throughout the day.
 
 ## what makes ginji different
 
@@ -13,7 +13,7 @@ ginji is intentionally compact and transparent. most behavior lives in one runti
 - language: python
 - runtime: terminal cli + repl
 - model provider: openai api
-- evolution cadence: daily workflow with pacific guard
+- evolution cadence: every 6 hours with one pacific-day publish
 - safety gates: `py_compile` and `pytest`
 
 ## quick example
