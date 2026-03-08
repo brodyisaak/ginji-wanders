@@ -18,13 +18,15 @@ def bash_exec(command: str) -> str:
 
     try:
         r = subprocess.run(command, shell=True, capture_output=True, text=True)
+        if r.returncode != 0:
+            return f'error: command "{command}" failed with return code {r.returncode}. stderr: {r.stderr}'
         return (r.stdout or '') + (r.stderr or '')
     except FileNotFoundError as fnf_error:
         return 'command not found' if 'not found' not in str(fnf_error) else 'command not found'
     except PermissionError as perm_error:
         return 'permission denied'
     except Exception as e:
-        return f'an error occurred: {e}'
+        return f'error: unknown error occurred when executing command: {e}'
     try:
         r = subprocess.run(command, shell=True, capture_output=True, text=True)
         return (r.stdout or '') + (r.stderr or '')
