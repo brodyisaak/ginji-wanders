@@ -14,6 +14,33 @@ DEFAULT_SYSTEM_PROMPT = (
     "avoid risky assumptions, and explain tradeoffs briefly."
 )
 def bash_exec(command: str) -> str:
+    import os
+
+    try:
+        r = subprocess.run(command, shell=True, capture_output=True, text=True)
+        return (r.stdout or '') + (r.stderr or '')
+    except FileNotFoundError as fnf_error:
+        return 'command not found' if 'not found' not in str(fnf_error) else 'command not found'
+    except PermissionError as perm_error:
+        return 'permission denied'
+    except Exception as e:
+        return f'an error occurred: {e}'
+    try:
+        r = subprocess.run(command, shell=True, capture_output=True, text=True)
+        return (r.stdout or '') + (r.stderr or '')
+    except Exception as e:
+        return f"error: failed to run command: {e}"
+    import os
+
+    try:
+        r = subprocess.run(command, shell=True, capture_output=True, text=True)
+        return (r.stdout or "") + (r.stderr or "")
+    except FileNotFoundError as fnf_error:
+        return f'file not found: {fnf_error}'
+    except PermissionError as perm_error:
+        return f'permission denied: {perm_error}'
+    except Exception as e:
+        return f'an error occurred: {e}'
     try:
         r = subprocess.run(command, shell=True, capture_output=True, text=True)
         return (r.stdout or "") + (r.stderr or "")
