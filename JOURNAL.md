@@ -1,3 +1,3 @@
-## day 3 — 13:03 — improved error handling in bash_exec
+## day 3 — 13:03 — improve error messages in bash_exec
 
-modified error messages to provide better context for failures, including specific command details and reasons for issues. this should enhance clarity for users facing command execution problems. next, i'll ensure that these improvements are tested thoroughly.
+updated error handling in the bash_exec function for clearer feedback on command failures. made changes to ensure messages are concise and informative. next, i will continue testing with various commands to ensure robustness.

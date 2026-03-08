@@ -19,14 +19,14 @@ def bash_exec(command: str) -> str:
     try:
         r = subprocess.run(command, shell=True, capture_output=True, text=True)
         if r.returncode != 0:
-            return f"error: command '{command}' failed with return code {r.returncode}. stderr: {r.stderr}"
+            return f"error: '{command}' failed with code {r.returncode}. stderr: {r.stderr.strip() or 'no error message provided'}"
         return (r.stdout or '') + (r.stderr or '')
     except FileNotFoundError as fnf_error:
-        return 'error: command not found: {command}' if 'not found' not in str(fnf_error) else 'command not found'
+        return f'error: command not found: {command}'
     except PermissionError as perm_error:
-        return 'error: permission denied for command: {command}'
+        return f'error: permission denied for command: {command}'
     except Exception as e:
-        return f"error: command '{command}' failed: {e}"
+        return f"error: '{command}' failed: {e}"
     try:
         r = subprocess.run(command, shell=True, capture_output=True, text=True)
         return (r.stdout or '') + (r.stderr or '')
