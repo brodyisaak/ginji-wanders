@@ -58,13 +58,11 @@ append_fallback_journal() {
   {
     echo "## day ${day_num} — ${now_hhmm} — fallback session summary"
     echo
-    echo "i ran an evolution session and completed the standard pipeline from planning to publish."
-    echo "explicit journal entry was written by the agent."
-    echo "the agent did not write a journal entry, so this fallback entry records the run state."
-    echo "build validation passed after recovery, and the repository remained in a healthy commit state."
-    echo "the website was rebuilt from JOURNAL.md, IDENTITY.md, and DAY_COUNT using scripts/build_site.py."
-    echo "i should improve journal reliability so future entries are authored directly by the agent with deeper detail."
-    echo "next session i will keep one focused change, report exact tests, and explain tradeoffs more clearly."
+    echo "i ran a full evolution loop and made it to publish without dropping the trail."
+    echo "this fallback landed because the normal journal writer missed its chance to speak."
+    echo "build checks passed, the site rebuilt cleanly, and the repo stayed healthy."
+    echo "i still want the real fox voice here next time, with sharper details from the actual work."
+    echo "next session i will keep one focused change and leave a better story in the log."
   } > "$entry_tmp"
   prepend_journal_entry "$day_num" "$entry_tmp"
   rm -f "$entry_tmp"
@@ -379,7 +377,7 @@ cat > /tmp/ginji_issue_prompt.txt <<EOF
 review SESSION_PLAN.md and your implementation logs.
 if you worked on any github issue, write ISSUE_RESPONSE.md exactly in the communicate skill format.
 if no issue work was done, do not create ISSUE_RESPONSE.md.
-keep lowercase where appropriate.
+keep lowercase and use ginji's small silver fox voice.
 EOF
 run_with_timeout "$IMPL_TIMEOUT" "cat /tmp/ginji_issue_prompt.txt | $GINJI_BIN --model '$MODEL' --skills skills" > /tmp/ginji_issue_phase.log || true
 
@@ -419,19 +417,19 @@ format exactly:
 ## day ${next_day} — ${now_hhmm} — [short title]
 
 requirements:
-- 5 to 8 sentences in lowercase
+- 4 to 6 sentences in lowercase
 - include what changed and why
 - mention at least one touched file path
 - mention test or build results
 - mention one thing that went wrong or was risky
-- include this exact sentence: explicit journal entry was written by the agent.
+- keep the tone playful and honest, like a small silver fox writing field notes
 - end with what is next
 EOF
 run_with_timeout "$IMPL_TIMEOUT" "cat /tmp/ginji_journal_prompt.txt | $GINJI_BIN --model '$MODEL' --skills skills" > /tmp/ginji_journal.log || true
-if [[ -f JOURNAL_ENTRY.md ]] && ! grep -q "explicit journal entry was written by the agent\\." JOURNAL_ENTRY.md; then
+if [[ -f JOURNAL_ENTRY.md ]] && ! grep -q "^## day ${next_day} —" JOURNAL_ENTRY.md; then
   cat > /tmp/ginji_journal_retry_prompt.txt <<EOF
-rewrite JOURNAL_ENTRY.md for day ${next_day} and include this exact sentence once:
-explicit journal entry was written by the agent.
+rewrite JOURNAL_ENTRY.md for day ${next_day} in ginji's voice.
+keep it lowercase, specific, and 4-6 sentences.
 do not write any files except JOURNAL_ENTRY.md.
 EOF
   run_with_timeout "$IMPL_TIMEOUT" "cat /tmp/ginji_journal_retry_prompt.txt | $GINJI_BIN --model '$MODEL' --skills skills" > /tmp/ginji_journal_retry.log || true
