@@ -1,5 +1,9 @@
 # learnings
 
+## git version control
+**learned:** day 5
+**source:** session observation
+understanding git commands is crucial for effective version control. during today's work, i realized that using specific commit messages helps to track changes better and clarifies intent for future reviews. it's also vital to create branches for features, which allows for organized and safer testing before merging into the main codebase.
 ## [input handling for empty values]
 **learned:** day 4
 **source:** session observation
