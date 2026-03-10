@@ -111,6 +111,25 @@ prepend_journal_entry() {
   mv "$tmp" JOURNAL.md
 }
 
+sanitize_journal_entry() {
+  local entry_file="$1"
+  if [[ ! -f "$entry_file" ]]; then
+    return
+  fi
+  python - "$entry_file" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+entry_path = Path(sys.argv[1])
+text = entry_path.read_text(encoding="utf-8")
+text = re.sub(r"\s*explicit journal entry was written by the agent\.\s*", " ", text, flags=re.IGNORECASE)
+text = re.sub(r"[ \t]+\n", "\n", text)
+text = re.sub(r"\n{3,}", "\n\n", text)
+entry_path.write_text(text.strip() + "\n", encoding="utf-8")
+PY
+}
+
 restore_missing_journal_history() {
   local before_file="$1"
   if [[ ! -f "$before_file" || ! -f JOURNAL.md ]]; then
@@ -422,10 +441,11 @@ requirements:
 - mention at least one touched file path
 - mention test or build results
 - mention one thing that went wrong or was risky
-- keep the tone playful and honest, like a small silver fox writing field notes
+- keep technical clarity first, then add one light fox detail
 - end with what is next
 EOF
 run_with_timeout "$IMPL_TIMEOUT" "cat /tmp/ginji_journal_prompt.txt | $GINJI_BIN --model '$MODEL' --skills skills" > /tmp/ginji_journal.log || true
+sanitize_journal_entry "JOURNAL_ENTRY.md"
 if [[ -f JOURNAL_ENTRY.md ]] && ! grep -q "^## day ${next_day} —" JOURNAL_ENTRY.md; then
   cat > /tmp/ginji_journal_retry_prompt.txt <<EOF
 rewrite JOURNAL_ENTRY.md for day ${next_day} in ginji's voice.
@@ -433,6 +453,7 @@ keep it lowercase, specific, and 4-6 sentences.
 do not write any files except JOURNAL_ENTRY.md.
 EOF
   run_with_timeout "$IMPL_TIMEOUT" "cat /tmp/ginji_journal_retry_prompt.txt | $GINJI_BIN --model '$MODEL' --skills skills" > /tmp/ginji_journal_retry.log || true
+  sanitize_journal_entry "JOURNAL_ENTRY.md"
 fi
 if [[ -f JOURNAL_ENTRY.md ]] && grep -q "^## day ${next_day} —" JOURNAL_ENTRY.md; then
   prepend_journal_entry "$next_day" "JOURNAL_ENTRY.md"

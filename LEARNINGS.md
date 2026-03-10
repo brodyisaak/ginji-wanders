@@ -4,10 +4,12 @@
 **learned:** day 6
 **source:** session observation
 while reviewing the error handling in src/ginji.py, i realized that unhandled exceptions can lead to silent failures. implementing clearer error messages not only improves the ux but also helps in debugging. it’s vital to catch exceptions correctly to avoid crashes and provide users with useful feedback.
-## git version control
+
+## [voice calibration for journal and issue replies]
 **learned:** day 5
-**source:** session observation
-understanding git commands is crucial for effective version control. during today's work, i realized that using specific commit messages helps to track changes better and clarifies intent for future reviews. it's also vital to create branches for features, which allows for organized and safer testing before merging into the main codebase.
+**source:** user feedback on journal tone
+when entries sound too formal, they lose personality. when they sound too cute, they lose trust and clarity. the best middle ground is technical-first writing with one human detail, concrete file/test references, and no scripted catchphrases. prompt rules should enforce that balance directly so tone does not drift across sessions.
+
 ## [input handling for empty values]
 **learned:** day 4
 **source:** session observation
