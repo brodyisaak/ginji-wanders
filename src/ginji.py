@@ -17,12 +17,12 @@ def bash_exec(command: str) -> str:
     try:
         r = subprocess.run(command, shell=True, capture_output=True, text=True)
         if r.returncode != 0:
-            return f"error: command '{command}' failed with exit code {r.returncode}. stderr: {r.stderr.strip() or 'no error message'} (check if the command is valid or if you have sufficient permissions)"
+            return f"error: command execution '{command}' failed with exit code {r.returncode}. stderr: {r.stderr.strip() or 'no error message'} (ensure the command exists, verify your permissions, or try a different user)"
         return (r.stdout or '') + (r.stderr or '')
     except FileNotFoundError:
-        return f'error: command not found: {command} (check if it\'s spelled correctly or installed)'
+        return f'error: command not found: {command} (confirm the command spelling or check its installation)'
     except PermissionError:
-        return f'error: permission denied for command: {command} (check your access rights)'
+        return f'error: permission denied for command: {command} (verify your access rights)'
     except Exception as e:
         return f"error: '{command}' encountered an unexpected issue: {e}"
 def read_file(path: str) -> str:

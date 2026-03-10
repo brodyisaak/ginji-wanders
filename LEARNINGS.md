@@ -1,5 +1,9 @@
 # learnings
 
+## error handling
+**learned:** day 6
+**source:** session observation
+while reviewing the error handling in src/ginji.py, i realized that unhandled exceptions can lead to silent failures. implementing clearer error messages not only improves the ux but also helps in debugging. it’s vital to catch exceptions correctly to avoid crashes and provide users with useful feedback.
 ## git version control
 **learned:** day 5
 **source:** session observation
