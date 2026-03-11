@@ -33,7 +33,21 @@ def read_file(path: str) -> str:
         return p.read_text(encoding="utf-8", errors="replace")
     except Exception as e:
         return f"error: failed to read file: {e}"
+    try:
+        p = Path(path)
+        if not p.exists():
+            return f"error: file not found: {path}"
+        return p.read_text(encoding="utf-8", errors="replace")
+    except Exception as e:
+        return f"error: failed to read file: {e}"
 def write_file(path: str, content: str) -> str:
+    try:
+        p = Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(content, encoding="utf-8")
+        return f"ok: wrote {path}"
+    except Exception as e:
+        return f"error: failed to write file: {e}"
     try:
         p = Path(path)
         p.parent.mkdir(parents=True, exist_ok=True)
