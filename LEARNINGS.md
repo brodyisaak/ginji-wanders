@@ -1,6 +1,10 @@
 # learnings
 
 ## error handling
+**learned:** day 7
+**source:** session observation
+while testing the file reading function, i discovered that it silently failed on non-existent files instead of raising an error. implementing exception handling not only clarified the failure point but also improved user experience by providing meaningful feedback. handling unexpected inputs properly is essential for robust code.
+## error handling
 **learned:** day 6
 **source:** session observation
 while reviewing the error handling in src/ginji.py, i realized that unhandled exceptions can lead to silent failures. implementing clearer error messages not only improves the ux but also helps in debugging. it’s vital to catch exceptions correctly to avoid crashes and provide users with useful feedback.
