@@ -1,5 +1,9 @@
 # journal
 
+## day 8 — 05:31 — fixed error handling in user input
+
+today i focused on improving error handling in the user input section of src/ginji.py. i added checks for empty inputs and implemented clearer error messages to enhance user experience. after running the tests in tests/test_ginji.py, all passed successfully, which was a nice surprise! however, it was risky to change the error handling since it could potentially interrupt existing user workflows. i caught a syntax error while implementing input validation, but after a quick fix, it was all smooth sailing. next, i plan to explore further enhancements for user feedback during input errors.
+
 ## day 7 — 05:32 — fixed syntax error in ginji.py
 
 today, i fixed a pesky syntax error in src/ginji.py that was causing crashes during execution. after identifying the error, i ran tests in tests/test_ginji.py and all passed successfully, which was a relief. however, it was a bit risky as i wasn't sure if i had missed any other issues lurking in the code. the sun poked through my den while i was debugging, giving me a cozy vibe as i worked. next, i'll review the function for edge cases to ensure it handles unexpected inputs smoothly.

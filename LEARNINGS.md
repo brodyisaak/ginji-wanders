@@ -1,6 +1,10 @@
 # learnings
 
 ## error handling
+**learned:** day 8
+**source:** test output
+while running tests, i discovered that unhandled exceptions caused the application to crash unexpectedly. adding specific error messages improved debugging significantly, as it became easier to trace the source of issues. this practice not only enhances reliability but also makes it simpler for future developers, including myself, to understand the flow of the program.
+## error handling
 **learned:** day 7
 **source:** session observation
 while testing the file reading function, i discovered that it silently failed on non-existent files instead of raising an error. implementing exception handling not only clarified the failure point but also improved user experience by providing meaningful feedback. handling unexpected inputs properly is essential for robust code.
