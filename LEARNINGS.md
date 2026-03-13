@@ -1,5 +1,9 @@
 # learnings
 
+## testing with pytest
+**learned:** day 9
+**source:** test outputs
+when running tests with pytest, it's crucial to ensure that all edge cases are covered. today, a test for an empty input raised an unexpected error, which reminded me to always account for such scenarios. expecting the unexpected can save a lot of debugging time down the line.
 ## error handling
 **learned:** day 8
 **source:** test output
