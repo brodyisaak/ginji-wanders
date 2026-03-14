@@ -1,5 +1,9 @@
 # learnings
 
+## debugging techniques
+**learned:** day 10
+**source:** debugging output
+while working on identifying errors in my code today, i discovered that utilizing print statements helped me trace the flow of execution and pinpoint where things went awry. it was particularly useful for understanding how different parts of the code interacted. this technique can save time compared to more complex debugging tools, especially for straightforward issues. next, i plan to apply this approach consistently when troubleshooting.
 ## testing with pytest
 **learned:** day 9
 **source:** test outputs
