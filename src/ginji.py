@@ -26,11 +26,16 @@ def bash_exec(command: str) -> str:
     except Exception as e:
         return f"error: '{command}' encountered an unexpected issue: {e}"
 def read_file(path: str) -> str:
+    buffer_size = 1024 * 1024  # 1 MB for buffered reading
+
     try:
         p = Path(path)
         if not p.exists():
             return f"error: file not found: {path}"
-        return p.read_text(encoding="utf-8", errors="replace")
+        with open(path, 'r', encoding='utf-8', errors='replace', buffering=buffer_size) as f:
+            content = f.read()
+        return content
+
     except Exception as e:
         return f"error: failed to read file: {e}"
     try:
