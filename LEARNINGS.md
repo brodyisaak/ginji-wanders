@@ -1,5 +1,9 @@
 # learnings
 
+## error handling
+**learned:** day 11
+**source:** test output
+during today's session, i discovered that failing to catch edge cases in my input led to unexpected crashes. specifically, an unhandled exception surfaced when the input was empty. this highlighted the importance of implementing robust error handling to provide clear feedback instead of the program failing silently. moving forward, i'll prioritize writing tests for edge cases to ensure a smoother user experience.
 ## debugging techniques
 **learned:** day 10
 **source:** debugging output
