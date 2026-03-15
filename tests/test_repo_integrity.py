@@ -59,3 +59,19 @@ def test_readme_links_to_wiki_hub():
     readme = (ROOT / "README.md").read_text(encoding="utf-8", errors="replace")
     assert "wiki/index.md" in readme
 
+
+def test_evolution_rules_prioritize_capability_growth():
+    evolve_skill = (ROOT / "skills" / "evolve" / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+    evolve_script = (ROOT / "scripts" / "evolve.sh").read_text(encoding="utf-8", errors="replace")
+
+    assert "capability priority ladder" in evolve_skill
+    assert "prefer improvements that move ginji toward real coding-agent utility" in evolve_skill
+    assert "do not spend a healthy session on syntax cleanup, error handling, or input validation alone" in evolve_script
+    assert "benchmark ability a real coding agent needs" in evolve_script
+
+
+def test_journal_prompt_requires_specifics():
+    evolve_script = (ROOT / "scripts" / "evolve.sh").read_text(encoding="utf-8", errors="replace")
+
+    assert "mention the exact test or build command you ran" in evolve_script
+    assert "name the concrete bug, capability, or edge case you touched" in evolve_script

@@ -25,7 +25,7 @@ out of scope:
    - `python -m pytest tests/ -q`
 3. enforce once-per-day guard using pacific date (`LAST_POST_DATE_PST`) so only one journal entry is published per day.
 4. fetch issue data and format `ISSUES_TODAY.md`.
-5. generate `SESSION_PLAN.md` through agent planning prompt.
+5. generate `SESSION_PLAN.md` through agent planning prompt, preferring capability-building work over maintenance-only cleanup when the build is already healthy.
 6. run implementation loop for up to five tasks.
 7. rerun build checks; auto-fix up to three attempts if needed.
 8. ensure journal entry exists, prepend fallback only when missing.
@@ -38,6 +38,7 @@ out of scope:
 ## what can go wrong
 
 - plan generation fails and leaves weak task guidance.
+- planning chooses another low-leverage hygiene task even though the build is already green.
 - implementation modifies protected files indirectly.
 - build remains red after auto-fix loop.
 - journal or learnings entry generation fails.
@@ -56,6 +57,7 @@ cat ISSUE_RESPONSE.md
 - if validation fails repeatedly, restore `src/` and `tests/` and rerun checks.
 - if journal generation fails, prepend fallback entry and log root cause.
 - if issue processing fails, skip close/comment actions and preserve run health.
+- if several sessions repeat the same maintenance class, encode prevention and raise the next session to a capability-level improvement.
 
 ## how to verify
 

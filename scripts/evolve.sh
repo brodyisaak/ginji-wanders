@@ -358,11 +358,17 @@ read these files before planning:
 - JOURNAL.md
 - LEARNINGS.md
 - ISSUES_TODAY.md
+- wiki/index.md
+- skill/autoresearch/references/core-principles.md
+- skill/autoresearch/references/autonomous-loop-protocol.md
 then run this command:
 python -m pytest tests/ -q
 write SESSION_PLAN.md content in lowercase where appropriate.
 choose one improvement only for this session.
-include: objective, scope, tests to run, risk notes, and up to five concrete tasks.
+prefer the highest-leverage capability-building improvement if the build is already healthy.
+do not spend a healthy session on syntax cleanup, error handling, or input validation alone unless that issue is actively blocking another capability.
+tie the chosen improvement to one benchmark ability a real coding agent needs: navigation, multi-file editing, test execution, git workflow, repo context, or recovery from failures.
+include: objective, benchmark gap, why this task moves ginji forward now, scope, tests to run, risk notes, and up to five concrete tasks.
 EOF
 
 run_with_timeout "$TIMEOUT" "cat /tmp/ginji_plan_prompt.txt | $GINJI_BIN --model '$MODEL' --skills skills" > SESSION_PLAN.md || true
@@ -372,10 +378,11 @@ fi
 
 echo "step 5: implementation loop (phase b)"
 for task_num in 1 2 3 4 5; do
-  cat > /tmp/ginji_impl_prompt.txt <<EOF
+cat > /tmp/ginji_impl_prompt.txt <<EOF
 you are implementing phase b task ${task_num} from SESSION_PLAN.md.
 python-specific work only.
 execute one next unfinished task from SESSION_PLAN.md.
+if the next task is only maintenance-level cleanup and the build is already healthy, skip it and move to the next task that improves agent capability or prevents repeated failure.
 after changes, run:
 python -m py_compile src/ginji.py && python -m pytest tests/ -q
 if stuck after 3 attempts revert with:
@@ -439,9 +446,10 @@ requirements:
 - 4 to 6 sentences in lowercase
 - include what changed and why
 - mention at least one touched file path
-- mention test or build results
+- mention the exact test or build command you ran
 - mention one thing that went wrong or was risky
 - keep technical clarity first, then add one light fox detail
+- name the concrete bug, capability, or edge case you touched
 - end with what is next
 EOF
 run_with_timeout "$IMPL_TIMEOUT" "cat /tmp/ginji_journal_prompt.txt | $GINJI_BIN --model '$MODEL' --skills skills" > /tmp/ginji_journal.log || true
@@ -474,6 +482,7 @@ format exactly:
 **learned:** day ${next_day}
 **source:** [session observation, test output, docs, or code review]
 [2-4 sentences describing one practical lesson from today's session]
+prefer a lesson that would help ginji avoid repeating the same class of low-leverage work.
 EOF
 run_with_timeout "$IMPL_TIMEOUT" "cat /tmp/ginji_learning_prompt.txt | $GINJI_BIN --model '$MODEL' --skills skills" > /tmp/ginji_learning.log || true
 if [[ -f LEARNINGS_ENTRY.md ]] && grep -q "^\\*\\*learned:\\*\\* day ${next_day}$" LEARNINGS_ENTRY.md; then

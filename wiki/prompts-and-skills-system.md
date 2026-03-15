@@ -31,6 +31,14 @@ skill inputs:
 - explicit operator context from cli should stay deterministic.
 - skills provide operational policy and safety constraints.
 - malformed skill frontmatter should not crash runtime.
+- keep prompt entry points short and map-like; deep detail belongs in linked docs.
+
+## agent-first context strategy
+
+- treat `wiki/index.md` as the map and repository markdown as the system of record.
+- prefer progressive disclosure: load only the docs needed for the current task.
+- if a decision is made in chat or review, capture it in-repo so future runs can discover it.
+- avoid one giant instruction file that mixes stale and active rules.
 
 ## what can go wrong
 
@@ -50,6 +58,8 @@ python src/ginji.py --skills skills -p "summarize active skills"
 - keep skill files small, focused, and explicit.
 - if conflicts appear, consolidate rules into one authoritative skill.
 - add tests for skill parsing edge cases when parser changes.
+- when the same confusion appears repeatedly, move that guidance from prose into enforceable checks.
+- run periodic doc-gardening passes to remove stale guidance and repair broken cross-links.
 
 ## how to verify
 

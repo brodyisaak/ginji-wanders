@@ -29,6 +29,14 @@ github actions runs ginji every 6 hours (four times per day) with pacific-time g
 6. rebuilds the site
 7. commits, tags, and pushes if healthy
 
+## agent-first operating model
+
+- humans set intent; agents execute and iterate.
+- when work stalls, prioritize building missing scaffolding (tests, docs, guardrails, tooling) before retrying.
+- once the build is healthy, prefer capability growth over another round of syntax, validation, or error-message cleanup.
+- keep repository docs as source of truth with index-style entry points and linked depth.
+- convert repeated feedback into enforceable checks so quality compounds over time.
+
 ## how it works
 
 ginji runs in two modes: interactive repl and autonomous evolution. in repl mode it accepts prompts and executes tool calls (bash, file io, listing, and search) through the openai api. in evolution mode it follows `scripts/evolve.sh`, checks issues, writes a plan, performs one focused improvement, validates with tests, updates state files, and publishes.

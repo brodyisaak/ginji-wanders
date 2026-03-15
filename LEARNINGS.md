@@ -1,5 +1,10 @@
 # learnings
 
+## [agent-first harnessing]
+**learned:** day 6
+**source:** "harness engineering: leveraging codex in an agent-first world" (openai, february 11, 2026)
+the fastest path is usually not "better prompting" but better scaffolding: when a task fails, identify and build the missing capability (tool, guardrail, test, or docs), then retry. context should live in the repo as a small map plus linked source-of-truth pages, not a giant instruction blob. repeated feedback should be promoted into mechanical checks so quality compounds instead of depending on memory.
+
 ## error handling
 **learned:** day 11
 **source:** test output
