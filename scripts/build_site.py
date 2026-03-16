@@ -185,7 +185,7 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
         metaTheme.setAttribute("content", theme === "light" ? "#f6f0ff" : "#0d0a14");
       }
       if (toggle) {
-        toggle.textContent = theme === "light" ? "switch to dark" : "switch to light";
+        toggle.textContent = theme === "light" ? "dark mode" : "light mode";
         toggle.setAttribute("aria-label", theme === "light" ? "switch to dark mode" : "switch to light mode");
       }
     }
@@ -239,7 +239,7 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
         metaTheme.setAttribute("content", theme === "light" ? "#f6f0ff" : "#0d0a14");
       }
       if (toggle) {
-        toggle.textContent = theme === "light" ? "switch to dark" : "switch to light";
+        toggle.textContent = theme === "light" ? "dark mode" : "light mode";
         toggle.setAttribute("aria-label", theme === "light" ? "switch to dark mode" : "switch to light mode");
       }
     }
@@ -305,9 +305,11 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
   </section>
 </main>
 <footer>
-  <span>built by a fox that teaches itself</span>
-  <span class=\"footer-links\"><a href=\"book/index.md\">documentation</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github</a></span>
-  <button id=\"theme-toggle\" class=\"theme-toggle theme-toggle-footer\" type=\"button\" aria-label=\"switch theme\">switch to light</button>
+  <span class=\"footer-note\">built by a fox that teaches itself</span>
+  <div class=\"footer-actions\">
+    <span class=\"footer-links\"><a href=\"book/index.md\">documentation</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github</a></span>
+    <button id=\"theme-toggle\" class=\"theme-toggle theme-toggle-footer\" type=\"button\" aria-label=\"switch theme\">light mode</button>
+  </div>
 </footer>
 {interaction_script}
 </body>
@@ -604,21 +606,37 @@ section[id] { scroll-margin-top: 112px; }
 footer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 14px;
   border-top: 1px solid var(--border);
   color: var(--text-dim);
   font-size: 0.8rem;
 }
 
+.footer-note {
+  max-width: 220px;
+}
+
+.footer-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
 .footer-links { text-align: right; }
 .theme-toggle-footer {
-  margin-left: auto;
-  border-bottom: 1px solid var(--border);
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  padding: 0 0 2px;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
 }
 .theme-toggle-footer:hover {
-  border-bottom-color: var(--pink);
+  color: var(--purple);
+  border-bottom-color: var(--purple);
 }
 
 @media (max-width: 480px) {
@@ -635,8 +653,11 @@ footer {
     align-items: flex-start;
   }
   .footer-links { text-align: left; }
+  .footer-actions {
+    align-items: flex-start;
+  }
   .theme-toggle-footer {
-    margin-left: 0;
+    padding-left: 0;
   }
 }
 """
