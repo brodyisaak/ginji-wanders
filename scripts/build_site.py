@@ -639,7 +639,29 @@ footer {
   border-bottom-color: var(--purple);
 }
 
-@media (max-width: 480px) {
+@media (min-width: 721px) {
+  .nav-menu-toggle {
+    display: none !important;
+  }
+  .nav-links {
+    display: flex !important;
+    position: static;
+    flex-basis: auto;
+    order: initial;
+    margin-top: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+  }
+  .nav-link-sep {
+    display: inline;
+  }
+}
+
+@media (max-width: 720px) {
   .hero h1 { font-size: 2.5rem; }
   html { scroll-padding-top: 102px; }
   section[id] { scroll-margin-top: 102px; }
@@ -696,18 +718,19 @@ footer {
   .status-strip {
     width: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    gap: 5px;
   }
   .status-card {
-    padding: 7px 9px;
+    padding: 6px 8px;
     min-height: 0;
+    border-radius: 12px;
   }
   .status-label {
-    font-size: 0.5rem;
+    font-size: 0.48rem;
   }
   .status-value {
-    font-size: 0.66rem;
-    line-height: 1.3;
+    font-size: 0.62rem;
+    line-height: 1.28;
   }
   .status-card:not(.status-card--wide) .status-value {
     display: -webkit-box;
@@ -723,7 +746,7 @@ footer {
   }
   .status-card--wide {
     grid-column: 1 / -1;
-    min-height: 72px;
+    min-height: 64px;
   }
   footer {
     flex-direction: column;
