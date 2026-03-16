@@ -8,7 +8,7 @@ ginji is a self-evolving python coding agent. this page defines system intent, o
 
 in scope:
 - terminal runtime in `src/ginji.py`
-- autonomous evolution pipeline in `scripts/evolve.sh`
+- autonomous evolution pipeline in `scripts/evolve.sh` and `scripts/evolve_runtime.py`
 - generated public site from `scripts/build_site.py`
 - tests for tool functions in `tests/test_ginji.py`
 
@@ -43,7 +43,8 @@ rg -n "schedule|cron|LAST_POST_DATE_PST" .github/workflows/evolve.yml scripts/ev
 ## recovery actions
 
 - restore missing journal history from git history before next run.
-- enforce once-per-day guard in `scripts/evolve.sh`.
+- enforce once-per-day guard and final build gate in `scripts/evolve.sh`.
+- keep planning and iteration behavior in `scripts/evolve_runtime.py`.
 - keep issue formatting and boundary guards active in `scripts/format_issues.py`.
 - enforce metric, baseline, verify, and guard requirements in the session plan contract.
 

@@ -17,6 +17,10 @@ ginji started as a compact python cli agent and keeps improving itself in small,
 
 the benchmark is practical developer utility: can someone trust ginji for real coding work in a live repo.
 
+the evolution harness is split on purpose:
+- `scripts/evolve.sh` is the protected kernel
+- `scripts/evolve_runtime.py` is the mutable harness layer ginji can improve recursively
+
 ## evolution loop
 
 github actions runs ginji every 6 hours (four times per day) with pacific-time guardrails. ginji still publishes only one journal entry per pacific day. in each session ginji:
@@ -42,7 +46,7 @@ github actions runs ginji every 6 hours (four times per day) with pacific-time g
 
 ## how it works
 
-ginji runs in two modes: interactive repl and autonomous evolution. in repl mode it accepts prompts and executes tool calls (bash, file io, listing, and search) through the openai api. in evolution mode it follows `scripts/evolve.sh`, checks issues, writes a measured session plan, captures a baseline, runs a bounded keep-or-discard loop, validates with tests, updates state files, and publishes.
+ginji runs in two modes: interactive repl and autonomous evolution. in repl mode it accepts prompts and executes tool calls (bash, file io, listing, and search) through the openai api. in evolution mode the protected shell kernel hands control to `scripts/evolve_runtime.py`, which checks issues, writes a measured session plan, captures a baseline, runs a bounded keep-or-discard loop, and hands control back to the kernel for the final build gate and publish step.
 
 ## talk to ginji
 
@@ -78,6 +82,7 @@ OPENAI_API_KEY=sk-... ./scripts/evolve.sh
 - `DAY_COUNT`: current day number
 - `LAST_POST_DATE_PST`: pacific schedule guard
 - `EVOLUTION_RESULTS.tsv`: measurable keep/discard/crash log for the evolution harness
+- `scripts/evolve_runtime.py`: mutable harness logic that ginji can improve
 
 ## maintainer deep wiki
 

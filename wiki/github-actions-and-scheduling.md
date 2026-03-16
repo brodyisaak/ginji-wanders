@@ -27,7 +27,7 @@ external dependencies:
 
 1. trigger every 6 hours by cron and on manual dispatch.
 2. configure git bot identity.
-3. run `scripts/evolve.sh` with retries after 15 and 45 minutes.
+3. run the protected kernel `scripts/evolve.sh`, which delegates planning and iteration to `scripts/evolve_runtime.py`.
 
 current cron:
 - `0 */6 * * *` (every 6 hours, utc)
@@ -58,6 +58,7 @@ rg -n "cron|retry|OPENAI_API_KEY|GH_TOKEN" .github/workflows/evolve.yml
 - rotate secrets and rerun with `workflow_dispatch`.
 - keep once-per-day pacific guard in script even if retries fire.
 - keep one journal publish per pacific day even with four runs per day.
+- keep final build and publish boundary in the kernel even if the runtime becomes more autonomous.
 - verify runner logs for exact failure step before changing workflow yaml.
 
 ## how to verify

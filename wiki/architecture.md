@@ -14,7 +14,8 @@ primary runtime units:
 - usage reporting
 
 supporting units:
-- autonomous runner script
+- protected autonomous kernel
+- mutable autonomous runtime
 - static site builder
 - workflow automation
 
@@ -26,10 +27,12 @@ supporting units:
    - defines tool schema and dispatch map
    - runs openai tool-call loop
 2. `scripts/evolve.sh`
-   - orchestrates autonomous sessions and git publishing
-3. `scripts/build_site.py`
+   - enforces the protected outer rails: env checks, pacific day guard, journal preservation, final build gate, commit, tag, and push
+3. `scripts/evolve_runtime.py`
+   - runs planning, metric selection, bounded iterations, issue response handling, learnings, and site rebuild
+4. `scripts/build_site.py`
    - renders docs site from state files
-4. `tests/test_ginji.py`
+5. `tests/test_ginji.py`
    - validates local tool behavior
 
 ## step-by-step flow
@@ -54,6 +57,7 @@ supporting units:
 - malformed tool json can break dispatch if not guarded.
 - tool functions may diverge from tests.
 - prompt layer ordering can become inconsistent.
+- mutable harness logic can drift unless the kernel/runtime boundary stays explicit.
 
 ## diagnostics
 
@@ -67,6 +71,7 @@ python -m pytest tests/test_ginji.py -v
 
 - restore contract behavior by aligning tool implementations with test expectations.
 - if prompt composition regresses, compare against known-good commit and update tests.
+- if evolution behavior regresses, check whether the change belonged in `scripts/evolve_runtime.py` instead of the protected kernel.
 
 ## how to verify
 

@@ -63,38 +63,58 @@ def test_readme_links_to_wiki_hub():
 def test_evolution_rules_prioritize_capability_growth():
     evolve_skill = (ROOT / "skills" / "evolve" / "SKILL.md").read_text(encoding="utf-8", errors="replace")
     evolve_script = (ROOT / "scripts" / "evolve.sh").read_text(encoding="utf-8", errors="replace")
+    evolve_runtime = (ROOT / "scripts" / "evolve_runtime.py").read_text(encoding="utf-8", errors="replace")
 
     assert "capability priority ladder" in evolve_skill
+    assert "recursive harness rule" in evolve_skill
     assert "measured session contract" in evolve_skill
     assert "prefer improvements that move ginji toward real coding-agent utility" in evolve_skill
-    assert "do not spend a healthy session on syntax cleanup, error handling, or input validation alone" in evolve_script
-    assert "benchmark ability a real coding agent needs" in evolve_script
+    assert "do not spend a healthy session on syntax cleanup, error handling, or input validation alone" in evolve_runtime
+    assert "benchmark ability a real coding agent needs" in evolve_runtime
 
 
 def test_journal_prompt_requires_specifics():
-    evolve_script = (ROOT / "scripts" / "evolve.sh").read_text(encoding="utf-8", errors="replace")
+    evolve_runtime = (ROOT / "scripts" / "evolve_runtime.py").read_text(encoding="utf-8", errors="replace")
 
-    assert "mention the exact test or build command you ran" in evolve_script
-    assert "name the concrete bug, capability, or edge case you touched" in evolve_script
+    assert "mention the exact test or build command you ran" in evolve_runtime
+    assert "name the concrete bug, capability, or edge case you touched" in evolve_runtime
 
 
 def test_metric_loop_language_is_present():
     evolve_script = (ROOT / "scripts" / "evolve.sh").read_text(encoding="utf-8", errors="replace")
+    evolve_runtime = (ROOT / "scripts" / "evolve_runtime.py").read_text(encoding="utf-8", errors="replace")
     readme = (ROOT / "README.md").read_text(encoding="utf-8", errors="replace")
 
-    assert "goal:" in evolve_script
-    assert "benchmark_gap:" in evolve_script
-    assert "verify:" in evolve_script
-    assert "guard:" in evolve_script
-    assert "iteration_budget:" in evolve_script
-    assert "EVOLUTION_RESULTS.tsv" in evolve_script
-    assert "baseline metric" in evolve_script or "baseline row" in evolve_script
+    assert "scripts/evolve_runtime.py" in evolve_script
+    assert "final build guard before publish" in evolve_script
+    assert "goal:" in evolve_runtime
+    assert "benchmark_gap:" in evolve_runtime
+    assert "verify:" in evolve_runtime
+    assert "guard:" in evolve_runtime
+    assert "iteration_budget:" in evolve_runtime
+    assert "EVOLUTION_RESULTS.tsv" in evolve_runtime
+    assert "baseline row" in evolve_runtime
     assert "bounded internal iteration loop" in readme
 
 
 def test_repo_does_not_depend_on_local_skill_scratch_folder():
     evolve_script = (ROOT / "scripts" / "evolve.sh").read_text(encoding="utf-8", errors="replace")
+    evolve_runtime = (ROOT / "scripts" / "evolve_runtime.py").read_text(encoding="utf-8", errors="replace")
     readme = (ROOT / "README.md").read_text(encoding="utf-8", errors="replace")
 
     assert "skill/autoresearch" not in evolve_script
+    assert "skill/autoresearch" not in evolve_runtime
     assert "skill/autoresearch" not in readme
+
+
+def test_kernel_runtime_split_is_explicit():
+    evolve_script = (ROOT / "scripts" / "evolve.sh").read_text(encoding="utf-8", errors="replace")
+    evolve_runtime = (ROOT / "scripts" / "evolve_runtime.py").read_text(encoding="utf-8", errors="replace")
+    readme = (ROOT / "README.md").read_text(encoding="utf-8", errors="replace")
+
+    assert "protected kernel" in readme
+    assert "mutable harness layer" in readme
+    assert "python scripts/evolve_runtime.py" in evolve_script
+    assert "kernel: final build guard before publish" in evolve_script
+    assert "restore_missing_journal_history" in evolve_script
+    assert "run_ginji_prompt" in evolve_runtime

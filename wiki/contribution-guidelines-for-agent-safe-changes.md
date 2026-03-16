@@ -24,13 +24,14 @@ applies to:
 
 sensitive files include:
 - `scripts/evolve.sh`
+- `scripts/evolve_runtime.py` (mutable, but high-impact)
 - `.github/workflows/*`
 - `JOURNAL.md`
 - `LEARNINGS.md`
 - `DAY_COUNT`
 - `LAST_POST_DATE_PST`
 
-changes here require explicit rationale and verification notes in commit message or pr description.
+changes to the kernel require explicit rationale and verification notes in commit message or pr description. changes to `scripts/evolve_runtime.py` are allowed more often, but still need focused scope and test evidence.
 
 ## what can go wrong
 

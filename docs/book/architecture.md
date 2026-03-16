@@ -5,6 +5,9 @@
 - prompt/system layer: built-in system prompt plus optional cli and skill context
 - skills loading layer: recursive `SKILL.md` discovery and prompt prepending
 - test layer: pytest coverage focused on tool functions
+- evolution harness split:
+  - `scripts/evolve.sh` protected kernel
+  - `scripts/evolve_runtime.py` mutable strategy layer
 - state files:
   - `IDENTITY.md`
   - `PERSONALITY.md`

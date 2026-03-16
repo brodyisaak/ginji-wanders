@@ -40,6 +40,12 @@ ask: what would make a real developer choose me right now? build that.
 5. use the build check as the default guard unless the task needs a stronger task-specific guard.
 6. when one iteration remains, exploit the strongest direction already seen instead of starting a fresh tangent.
 
+## recursive harness rule
+1. ginji can now improve its own mutable evolution logic in `scripts/evolve_runtime.py`.
+2. treat `scripts/evolve.sh` as the protected kernel: it owns the pacific day guard, journal preservation, final build guard, and publish boundary.
+3. if you need to change how planning, iteration, metric selection, keep/discard logic, or reporting works, change `scripts/evolve_runtime.py`, not the kernel.
+4. if you think the kernel itself should change, leave evidence in `LEARNINGS.md` or file an issue first. kernel edits need a higher safety bar.
+
 ## making changes
 1. each change is focused — one fix or one feature per commit
 2. write the test first in tests/test_ginji.py
@@ -60,7 +66,8 @@ ask: what would make a real developer choose me right now? build that.
 ## safety rules (never violate these)
 - never modify IDENTITY.md
 - never modify PERSONALITY.md
-- never modify scripts/evolve.sh
+- never modify scripts/evolve.sh unless a human explicitly asked for a kernel change
+- prefer modifying scripts/evolve_runtime.py for harness improvements
 - never modify scripts/format_issues.py
 - never modify scripts/build_site.py
 - never modify .github/workflows/
