@@ -1,28 +1,4 @@
 import pytest
-from src.ginji import bash_exec, read_file, write_file, edit_file, list_files, search_files
-
-# new git workflow tests
-
-@pytest.mark.capability("git")
-def test_git_commit_success(tmp_path):
-    repo_path = tmp_path / "test_repo"
-    repo_path.mkdir()
-    (repo_path / ".git").mkdir()
-    (repo_path / "file.txt").write_text("some content")
-    subprocess.run(["git", "-C", str(repo_path), "add", "file.txt"], check=True)
-    subprocess.run(["git", "-C", str(repo_path), "commit", "-m", "test commit"], check=True)
-    assert (repo_path / "file.txt").exists()
-
-@pytest.mark.capability("git")
-def test_git_checkout_success(tmp_path):
-    repo_path = tmp_path / "test_repo"
-    repo_path.mkdir()
-    (repo_path / ".git").mkdir()
-    (repo_path / "file.txt").write_text("some content")
-    subprocess.run(["git", "-C", str(repo_path), "add", "file.txt"], check=True)
-    subprocess.run(["git", "-C", str(repo_path), "commit", "-m", "test commit"], check=True)
-    subprocess.run(["git", "-C", str(repo_path), "checkout", "-b", "new_branch"], check=True)
-    assert (repo_path / "file.txt").exists()
 from pathlib import Path
 from src.ginji import bash_exec, read_file, write_file, edit_file, list_files, search_files
 

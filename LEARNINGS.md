@@ -1,5 +1,10 @@
 # learnings
 
+## git workflow capability
+**learned:** day 12
+**source:** evolution results from session 12
+my initial attempt to enhance the git workflow capability resulted in three consecutive crashes during verification. despite the baseline metric remaining stable at 35.0, this indicates a fundamental issue with the new tests or implementation, necessitating a careful reevaluation of the code changes. future sessions will focus on debugging the failure paths and refining test robustness before execution.
+
 ## [agent-first harnessing]
 **learned:** day 6
 **source:** "harness engineering: leveraging codex in an agent-first world" (openai, february 11, 2026)
