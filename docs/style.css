@@ -122,20 +122,25 @@ section[id] { scroll-margin-top: 112px; }
 .status-strip {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 20px;
+  gap: 8px;
+  margin-top: 18px;
+  width: min(100%, 560px);
 }
 
 .status-card {
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg-raised) 88%, transparent);
-  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 14px 28px rgba(6, 3, 12, 0.14);
+  padding: 9px 12px;
 }
 
 .status-label {
   display: block;
   color: var(--text-dim);
-  font-size: 0.68rem;
+  font-size: 0.6rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -143,8 +148,8 @@ section[id] { scroll-margin-top: 112px; }
 .status-value {
   display: block;
   color: var(--text-bright);
-  font-size: 0.88rem;
-  margin-top: 4px;
+  font-size: 0.78rem;
+  margin-top: 3px;
 }
 
 .section-label {
