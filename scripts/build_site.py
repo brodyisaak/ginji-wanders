@@ -13,12 +13,6 @@ SITE_NAME = "ginji"
 SITE_DESC = "ginji is a self-evolving python coding agent that journals progress in public."
 GITHUB_URL = "https://github.com/brodyisaak/ginji-wanders"
 ARCH_WIKI_URL = f"{GITHUB_URL}/blob/main/wiki/index.md"
-STATUS_HELP = {
-    "day": "the newest published journal day on the site.",
-    "capability score": "a weighted score based on passing tests across ginji's core agent abilities.",
-    "tests passing": "the current number of passing pytest checks in the repo.",
-    "latest entry": "the title of ginji's most recent published journal entry.",
-}
 
 def inline_format(text: str) -> str:
     clean = html.escape(text)
@@ -126,16 +120,11 @@ def render_identity(paragraphs, rules):
 def render_status_strip(stats):
     cards = []
     for item in stats:
-        help_text = inline_format(STATUS_HELP.get(item["label"], "status detail"))
         cards.append(
             "\n".join(
                 [
                     '<div class="status-card">',
-                    '  <div class="status-topline">',
-                    f'    <span class="status-label">{inline_format(item["label"])}</span>',
-                    '    <button class="status-help" type="button" aria-label="more info">?</button>',
-                    f'    <span class="status-tooltip" role="tooltip">{help_text}</span>',
-                    '  </div>',
+                    f'  <span class="status-label">{inline_format(item["label"])}</span>',
                     f'  <span class="status-value">{inline_format(item["value"])}</span>',
                     '</div>',
                 ]
@@ -446,17 +435,9 @@ section[id] { scroll-margin-top: 112px; }
 }
 
 .status-card {
-  position: relative;
   border: 1px solid var(--border);
   background: color-mix(in srgb, var(--bg-raised) 88%, transparent);
   padding: 12px;
-}
-
-.status-topline {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
 }
 
 .status-label {
@@ -465,65 +446,6 @@ section[id] { scroll-margin-top: 112px; }
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-.status-help {
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-dim);
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  padding: 0;
-  font-family: var(--font);
-  font-size: 0.65rem;
-  line-height: 1;
-  cursor: help;
-}
-
-.status-help:hover,
-.status-help:focus-visible {
-  color: var(--purple);
-  border-color: var(--purple);
-}
-
-.status-tooltip {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 0;
-  width: min(220px, 70vw);
-  padding: 9px 10px;
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg-raised) 96%, transparent);
-  color: var(--text);
-  font-size: 0.74rem;
-  line-height: 1.5;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(4px);
-  transition: opacity 140ms ease, transform 140ms ease, visibility 140ms ease;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.status-tooltip::before {
-  content: "";
-  position: absolute;
-  top: -5px;
-  left: 12px;
-  width: 8px;
-  height: 8px;
-  background: color-mix(in srgb, var(--bg-raised) 96%, transparent);
-  border-left: 1px solid var(--border);
-  border-top: 1px solid var(--border);
-  transform: rotate(45deg);
-}
-
-.status-topline:hover .status-tooltip,
-.status-topline:focus-within .status-tooltip {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
 }
 
 .status-value {
