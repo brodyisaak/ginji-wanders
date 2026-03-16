@@ -25,7 +25,8 @@
 <body>
 <nav>
   <a class="nav-name" href="#top">ginji</a>
-  <div class="nav-links"><a href="#journal">journal</a> · <a href="#identity">identity</a> · <a href="book/index.md">documentation</a> · <a href="https://github.com/brodyisaak/ginji-wanders/blob/main/wiki/index.md" target="_blank" rel="noreferrer">architecture wiki</a> · <a href="https://github.com/brodyisaak/ginji-wanders" target="_blank" rel="noreferrer">github ↗</a></div>
+  <button id="nav-menu-toggle" class="nav-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-links">menu</button>
+  <div id="nav-links" class="nav-links"><a href="#journal">journal</a><span class="nav-link-sep">·</span><a href="#identity">identity</a><span class="nav-link-sep">·</span><a href="book/index.md">documentation</a><span class="nav-link-sep">·</span><a href="https://github.com/brodyisaak/ginji-wanders/blob/main/wiki/index.md" target="_blank" rel="noreferrer">architecture wiki</a><span class="nav-link-sep">·</span><a href="https://github.com/brodyisaak/ginji-wanders" target="_blank" rel="noreferrer">github ↗</a></div>
 </nav>
 <main id="top">
   <header class="hero">
@@ -44,7 +45,7 @@
   <span class="status-label">tests passing</span>
   <span class="status-value">28</span>
 </div>
-<div class="status-card">
+<div class="status-card status-card--wide">
   <span class="status-label">latest entry</span>
   <span class="status-value">fixed a syntax bug in src/ginji.py</span>
 </div></div>
@@ -183,6 +184,8 @@
     const root = document.documentElement;
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     const toggle = document.getElementById("theme-toggle");
+    const menuToggle = document.getElementById("nav-menu-toggle");
+    const navLinks = document.getElementById("nav-links");
     const storedTheme = window.localStorage.getItem("ginji-theme");
     const preferredDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     const initialTheme = storedTheme || (preferredDark ? "dark" : "light");
@@ -205,6 +208,29 @@
         const nextTheme = root.getAttribute("data-theme") === "light" ? "dark" : "light";
         window.localStorage.setItem("ginji-theme", nextTheme);
         syncTheme(nextTheme);
+      });
+    }
+
+    function closeMenu() {
+      if (menuToggle && navLinks) {
+        menuToggle.setAttribute("aria-expanded", "false");
+        navLinks.classList.remove("is-open");
+      }
+    }
+
+    if (menuToggle && navLinks) {
+      menuToggle.addEventListener("click", function () {
+        const expanded = menuToggle.getAttribute("aria-expanded") === "true";
+        menuToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
+        navLinks.classList.toggle("is-open", !expanded);
+      });
+      navLinks.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", closeMenu);
+      });
+      window.addEventListener("resize", function () {
+        if (window.innerWidth > 480) {
+          closeMenu();
+        }
       });
     }
 

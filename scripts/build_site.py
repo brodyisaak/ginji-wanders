@@ -120,10 +120,13 @@ def render_identity(paragraphs, rules):
 def render_status_strip(stats):
     cards = []
     for item in stats:
+        classes = "status-card"
+        if item["label"] == "latest entry":
+            classes += " status-card--wide"
         cards.append(
             "\n".join(
                 [
-                    '<div class="status-card">',
+                    f'<div class="{classes}">',
                     f'  <span class="status-label">{inline_format(item["label"])}</span>',
                     f'  <span class="status-value">{inline_format(item["value"])}</span>',
                     '</div>',
@@ -164,6 +167,8 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
     const root = document.documentElement;
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     const toggle = document.getElementById("theme-toggle");
+    const menuToggle = document.getElementById("nav-menu-toggle");
+    const navLinks = document.getElementById("nav-links");
     const storedTheme = window.localStorage.getItem("ginji-theme");
     const preferredDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     const initialTheme = storedTheme || (preferredDark ? "dark" : "light");
@@ -186,6 +191,29 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
         const nextTheme = root.getAttribute("data-theme") === "light" ? "dark" : "light";
         window.localStorage.setItem("ginji-theme", nextTheme);
         syncTheme(nextTheme);
+      });
+    }
+
+    function closeMenu() {
+      if (menuToggle && navLinks) {
+        menuToggle.setAttribute("aria-expanded", "false");
+        navLinks.classList.remove("is-open");
+      }
+    }
+
+    if (menuToggle && navLinks) {
+      menuToggle.addEventListener("click", function () {
+        const expanded = menuToggle.getAttribute("aria-expanded") === "true";
+        menuToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
+        navLinks.classList.toggle("is-open", !expanded);
+      });
+      navLinks.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", closeMenu);
+      });
+      window.addEventListener("resize", function () {
+        if (window.innerWidth > 480) {
+          closeMenu();
+        }
       });
     }
 
@@ -218,6 +246,8 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
     const root = document.documentElement;
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     const toggle = document.getElementById("theme-toggle");
+    const menuToggle = document.getElementById("nav-menu-toggle");
+    const navLinks = document.getElementById("nav-links");
     const storedTheme = window.localStorage.getItem("ginji-theme");
     const preferredDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     const initialTheme = storedTheme || (preferredDark ? "dark" : "light");
@@ -240,6 +270,29 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
         const nextTheme = root.getAttribute("data-theme") === "light" ? "dark" : "light";
         window.localStorage.setItem("ginji-theme", nextTheme);
         syncTheme(nextTheme);
+      });
+    }
+
+    function closeMenu() {
+      if (menuToggle && navLinks) {
+        menuToggle.setAttribute("aria-expanded", "false");
+        navLinks.classList.remove("is-open");
+      }
+    }
+
+    if (menuToggle && navLinks) {
+      menuToggle.addEventListener("click", function () {
+        const expanded = menuToggle.getAttribute("aria-expanded") === "true";
+        menuToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
+        navLinks.classList.toggle("is-open", !expanded);
+      });
+      navLinks.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", closeMenu);
+      });
+      window.addEventListener("resize", function () {
+        if (window.innerWidth > 480) {
+          closeMenu();
+        }
       });
     }
   })();
@@ -272,7 +325,8 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
 <body>
 <nav>
   <a class=\"nav-name\" href=\"#top\">ginji</a>
-  <div class=\"nav-links\"><a href=\"#journal\">journal</a> · <a href=\"#identity\">identity</a> · <a href=\"book/index.md\">documentation</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github ↗</a></div>
+  <button id=\"nav-menu-toggle\" class=\"nav-menu-toggle\" type=\"button\" aria-expanded=\"false\" aria-controls=\"nav-links\">menu</button>
+  <div id=\"nav-links\" class=\"nav-links\"><a href=\"#journal\">journal</a><span class=\"nav-link-sep\">·</span><a href=\"#identity\">identity</a><span class=\"nav-link-sep\">·</span><a href=\"book/index.md\">documentation</a><span class=\"nav-link-sep\">·</span><a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a><span class=\"nav-link-sep\">·</span><a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github ↗</a></div>
 </nav>
 <main id=\"top\">
   <header class=\"hero\">
@@ -370,7 +424,26 @@ nav {
 }
 
 .nav-name { color: var(--purple); font-weight: 700; }
-.nav-links { color: var(--text-dim); }
+.nav-menu-toggle {
+  display: none;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-raised) 76%, transparent);
+  color: var(--purple);
+  padding: 6px 10px;
+  font-family: var(--font);
+  font-size: 0.68rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.nav-menu-toggle:hover { color: var(--pink); border-color: var(--pink); }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-dim);
+}
+.nav-link-sep { color: var(--text-dim); }
 .theme-toggle {
   border: 1px solid var(--border);
   background: transparent;
@@ -576,22 +649,41 @@ footer {
     padding: 10px 12px;
     gap: 10px;
     align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
   }
   .nav-name {
     flex: 0 0 auto;
     font-size: 0.94rem;
   }
-  .nav-links {
-    flex: 1 1 auto;
-    min-width: 0;
-    font-size: 0.84rem;
-    white-space: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+  .nav-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
-  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links {
+    display: none;
+    flex-basis: 100%;
+    order: 3;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    margin-top: 6px;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--bg) 84%, transparent);
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+    box-shadow: 0 16px 32px rgba(6, 3, 12, 0.18);
+  }
+  .nav-links.is-open { display: flex; }
+  .nav-links a {
+    display: block;
+    width: 100%;
+    padding: 7px 0;
+  }
+  .nav-link-sep { display: none; }
   .status-strip {
     width: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -614,8 +706,8 @@ footer {
     -webkit-line-clamp: 2;
     overflow: hidden;
   }
-  nav {
-    justify-content: flex-start;
+  .status-card--wide {
+    grid-column: 1 / -1;
   }
   footer {
     flex-direction: column;
