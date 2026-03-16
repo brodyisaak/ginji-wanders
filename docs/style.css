@@ -260,12 +260,54 @@ footer {
 
 @media (max-width: 480px) {
   .hero h1 { font-size: 2.5rem; }
-  html { scroll-padding-top: 130px; }
-  section[id] { scroll-margin-top: 130px; }
-  .status-strip { grid-template-columns: 1fr; }
+  html { scroll-padding-top: 102px; }
+  section[id] { scroll-margin-top: 102px; }
   nav {
-    flex-direction: column;
-    align-items: flex-start;
+    top: 8px;
+    margin-top: 8px;
+    padding: 10px 12px;
+    gap: 10px;
+    align-items: center;
+  }
+  .nav-name {
+    flex: 0 0 auto;
+    font-size: 0.94rem;
+  }
+  .nav-links {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.84rem;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .status-strip {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .status-card {
+    padding: 8px 10px;
+    min-height: 78px;
+  }
+  .status-label {
+    font-size: 0.53rem;
+  }
+  .status-value {
+    font-size: 0.7rem;
+    line-height: 1.35;
+  }
+  .status-card:last-child .status-value {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  nav {
+    justify-content: flex-start;
   }
   footer {
     flex-direction: column;
