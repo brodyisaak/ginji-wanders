@@ -327,12 +327,11 @@ footer {
     display: none;
     flex-basis: 100%;
     order: 3;
-    display: none;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: stretch;
+    flex-wrap: wrap;
+    align-items: flex-start;
     gap: 6px;
     margin-top: 6px;
-    padding: 8px;
+    padding: 8px 9px;
     border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
     border-radius: 14px;
     background: color-mix(in srgb, var(--bg) 84%, transparent);
@@ -340,17 +339,19 @@ footer {
     -webkit-backdrop-filter: blur(18px) saturate(145%);
     box-shadow: 0 16px 32px rgba(6, 3, 12, 0.18);
   }
-  .nav-links.is-open { display: grid; }
+  .nav-links.is-open { display: flex; }
   .nav-links a {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    min-height: 40px;
-    width: 100%;
-    padding: 8px 10px;
+    min-height: 34px;
+    width: auto;
+    max-width: 100%;
+    padding: 6px 10px;
     border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
     border-radius: 10px;
     background: color-mix(in srgb, var(--bg-raised) 54%, transparent);
-    font-size: 0.78rem;
+    font-size: 0.74rem;
+    white-space: nowrap;
   }
   .nav-link-sep { display: none; }
   .status-strip {
@@ -360,7 +361,7 @@ footer {
   }
   .status-card {
     padding: 6px 8px;
-    min-height: 0;
+    min-height: 60px;
     border-radius: 12px;
   }
   .status-label {
@@ -370,21 +371,15 @@ footer {
     font-size: 0.62rem;
     line-height: 1.28;
   }
-  .status-card:not(.status-card--wide) .status-value {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-  }
-  .status-card--wide .status-value {
+  .status-card .status-value {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     overflow: hidden;
   }
   .status-card--wide {
-    grid-column: 1 / -1;
-    min-height: 64px;
+    grid-column: auto;
+    min-height: 60px;
   }
   footer {
     flex-direction: column;
