@@ -209,7 +209,7 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
     title = "ginji | self-evolving python coding agent"
     structured = build_structured_data(day_count)
     show_more_button = (
-        f'<button id="show-more" class="show-more" type="button">show more ({hidden_count})</button>'
+        f'<button id="show-more" class="show-more" type="button" data-hidden-count="{hidden_count}" data-state="collapsed">show more ({hidden_count})</button>'
         if hidden_count > 0
         else ""
     )
@@ -246,11 +246,22 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
 
     const button = document.getElementById("show-more");
     if (!button) return;
+    const hiddenEntries = Array.from(document.querySelectorAll(".entry-hidden"));
     button.addEventListener("click", function () {
-      document.querySelectorAll(".entry-hidden").forEach(function (node) {
-        node.classList.remove("entry-hidden");
+      const collapsed = button.getAttribute("data-state") !== "expanded";
+      hiddenEntries.forEach(function (node) {
+        node.classList.toggle("entry-hidden", !collapsed);
       });
-      button.remove();
+      button.setAttribute("data-state", collapsed ? "expanded" : "collapsed");
+      button.textContent = collapsed
+        ? "show less"
+        : "show more (" + button.getAttribute("data-hidden-count") + ")";
+      if (!collapsed) {
+        const journal = document.getElementById("journal");
+        if (journal) {
+          journal.scrollIntoView({ block: "start", behavior: "smooth" });
+        }
+      }
     });
   })();
 </script>
