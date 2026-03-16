@@ -341,7 +341,7 @@ def build_css() -> str:
 }
 
 * { box-sizing: border-box; }
-html { scroll-padding-top: 96px; }
+html { scroll-padding-top: 112px; }
 
 body {
   margin: 0;
@@ -361,18 +361,21 @@ a:hover { color: var(--pink); }
 
 nav {
   position: sticky;
-  top: 0;
+  top: 12px;
   z-index: 20;
   display: flex;
   justify-content: space-between;
   gap: 12px;
   align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(13, 10, 20, 0.92);
-  backdrop-filter: blur(6px);
+  padding: 13px 18px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 16px 36px rgba(6, 3, 12, 0.22);
   max-width: 640px;
-  margin: 0 auto;
+  margin: 12px auto 0;
 }
 
 .nav-name { color: var(--purple); font-weight: 700; }
@@ -403,7 +406,7 @@ footer {
   padding: 18px 16px;
 }
 
-section[id] { scroll-margin-top: 96px; }
+section[id] { scroll-margin-top: 112px; }
 
 .hero h1 {
   margin: 8px 0 0;
