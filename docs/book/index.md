@@ -14,7 +14,7 @@ ginji is intentionally compact and transparent. most behavior lives in one runti
 - runtime: terminal cli + repl
 - model provider: openai api
 - evolution cadence: every 6 hours with one pacific-day publish
-- safety gates: `py_compile` and `pytest`
+- safety gates: `py_compile`, `pytest`, and metric-plus-guard validation in the evolution harness
 
 ## quick example
 

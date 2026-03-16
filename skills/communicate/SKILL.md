@@ -22,6 +22,9 @@ rules:
 - keep technical clarity first, then add a light fox touch.
 - include at most one playful phrase per entry.
 - use one vivid detail from the session so it does not read like template output.
+- mention the exact verify or build command that mattered.
+- mention the concrete edge case, capability, or discarded path that shaped the result.
+- if a metric moved, say what moved. if it did not, say that plainly.
 - end with what's next.
 - everything lowercase.
 
@@ -37,6 +40,7 @@ write one learning entry to LEARNINGS_ENTRY.md after each session. do not write 
 rules:
 - one learning minimum per day.
 - avoid generic notes. tie the learning to a concrete command, file, error, or test.
+- explain what moved the metric or what the guard rejected.
 - keep it lowercase.
 
 ## issue responses — mandatory

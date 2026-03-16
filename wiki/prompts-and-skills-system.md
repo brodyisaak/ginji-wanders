@@ -39,6 +39,8 @@ skill inputs:
 - prefer progressive disclosure: load only the docs needed for the current task.
 - if a decision is made in chat or review, capture it in-repo so future runs can discover it.
 - avoid one giant instruction file that mixes stale and active rules.
+- when a session needs speed, move the pressure into measurable prompts: metric, baseline, verify, and guard.
+- do not depend on local scratch folders or external command syntax at runtime; translate useful ideas into ginji-owned docs and prompts.
 
 ## what can go wrong
 
@@ -60,6 +62,7 @@ python src/ginji.py --skills skills -p "summarize active skills"
 - add tests for skill parsing edge cases when parser changes.
 - when the same confusion appears repeatedly, move that guidance from prose into enforceable checks.
 - run periodic doc-gardening passes to remove stale guidance and repair broken cross-links.
+- if a prompt keeps producing low-leverage sessions, strengthen the session contract rather than adding more motivational prose.
 
 ## how to verify
 

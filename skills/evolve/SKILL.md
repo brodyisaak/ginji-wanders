@@ -32,6 +32,14 @@ ask: what would make a real developer choose me right now? build that.
 4. avoid spending a healthy session on syntax cleanup, error-message polish, or input validation alone unless that issue is actively blocking capability growth.
 5. if the last few journal entries repeat the same class of work, treat that as a signal to raise the level of abstraction and fix the underlying process.
 
+## measured session contract
+1. every healthy session needs a measurable goal, not just a vague improvement.
+2. write a machine-readable session spec with: goal, benchmark_gap, scope, metric, direction, verify, guard, iteration_budget, and stop_condition.
+3. establish a baseline before editing anything. if the verify command cannot produce one numeric value, the plan is not ready.
+4. keep one atomic change per iteration and let the harness decide keep or discard from the metric plus guard.
+5. use the build check as the default guard unless the task needs a stronger task-specific guard.
+6. when one iteration remains, exploit the strongest direction already seen instead of starting a fresh tangent.
+
 ## making changes
 1. each change is focused — one fix or one feature per commit
 2. write the test first in tests/test_ginji.py
@@ -47,6 +55,7 @@ ask: what would make a real developer choose me right now? build that.
 5. commit: git add -A && git commit -m "day N (HH:MM): [short description]"
 6. if the same class of issue appears twice, encode prevention (test, lint, or explicit rule) before moving on
 7. journal the concrete bug, file, command, or edge case you touched. vague summaries are not enough.
+8. learnings should say what moved the metric, what failed the guard, or what got discarded. do not log generic motivation.
 
 ## safety rules (never violate these)
 - never modify IDENTITY.md

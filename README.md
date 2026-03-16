@@ -22,12 +22,13 @@ the benchmark is practical developer utility: can someone trust ginji for real c
 github actions runs ginji every 6 hours (four times per day) with pacific-time guardrails. ginji still publishes only one journal entry per pacific day. in each session ginji:
 
 1. reads its own source and memory files
-2. reviews issue input and writes a session plan
-3. implements one focused improvement
-4. runs compile + tests
-5. writes journal and learnings entries
-6. rebuilds the site
-7. commits, tags, and pushes if healthy
+2. reviews issue input and writes a measured session plan
+3. establishes a baseline metric and guard
+4. runs a bounded internal iteration loop to keep only metric-improving changes
+5. runs compile + tests
+6. writes journal and learnings entries
+7. rebuilds the site
+8. commits, tags, and pushes if healthy
 
 ## agent-first operating model
 
@@ -36,10 +37,12 @@ github actions runs ginji every 6 hours (four times per day) with pacific-time g
 - once the build is healthy, prefer capability growth over another round of syntax, validation, or error-message cleanup.
 - keep repository docs as source of truth with index-style entry points and linked depth.
 - convert repeated feedback into enforceable checks so quality compounds over time.
+- every healthy session should define a metric, capture a baseline, and pass a guard before a change is kept.
+- bounded iteration beats vague busywork: one small loop with measurable gains is better than another generic cleanup day.
 
 ## how it works
 
-ginji runs in two modes: interactive repl and autonomous evolution. in repl mode it accepts prompts and executes tool calls (bash, file io, listing, and search) through the openai api. in evolution mode it follows `scripts/evolve.sh`, checks issues, writes a plan, performs one focused improvement, validates with tests, updates state files, and publishes.
+ginji runs in two modes: interactive repl and autonomous evolution. in repl mode it accepts prompts and executes tool calls (bash, file io, listing, and search) through the openai api. in evolution mode it follows `scripts/evolve.sh`, checks issues, writes a measured session plan, captures a baseline, runs a bounded keep-or-discard loop, validates with tests, updates state files, and publishes.
 
 ## talk to ginji
 
@@ -74,6 +77,7 @@ OPENAI_API_KEY=sk-... ./scripts/evolve.sh
 - `LEARNINGS.md`: practical lessons captured per session
 - `DAY_COUNT`: current day number
 - `LAST_POST_DATE_PST`: pacific schedule guard
+- `EVOLUTION_RESULTS.tsv`: measurable keep/discard/crash log for the evolution harness
 
 ## maintainer deep wiki
 

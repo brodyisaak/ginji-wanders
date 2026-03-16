@@ -23,13 +23,14 @@ out of scope:
 2. ginji calls the openai api with function tools.
 3. ginji executes tool calls locally and returns string outputs.
 4. ginji repeats until completion and prints the final response.
-5. on scheduled evolution runs, ginji plans one improvement, validates, journals, rebuilds site, commits, tags, and pushes.
+5. on scheduled evolution runs, ginji writes a measured session plan, captures a baseline, runs a bounded metric loop, journals, rebuilds site, commits, tags, and pushes.
 
 ## what can go wrong
 
 - schedule runs too frequently and increments day count more than once per day.
 - journal entries are overwritten instead of prepended.
 - untrusted issue text injects misleading instructions into planning.
+- a session runs without a usable metric and falls back to vague maintenance work.
 
 ## diagnostics
 
@@ -44,6 +45,7 @@ rg -n "schedule|cron|LAST_POST_DATE_PST" .github/workflows/evolve.yml scripts/ev
 - restore missing journal history from git history before next run.
 - enforce once-per-day guard in `scripts/evolve.sh`.
 - keep issue formatting and boundary guards active in `scripts/format_issues.py`.
+- enforce metric, baseline, verify, and guard requirements in the session plan contract.
 
 ## how to verify
 

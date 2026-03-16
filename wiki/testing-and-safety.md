@@ -9,6 +9,7 @@ define the minimum safety bar for every autonomous or manual change.
 validation scope:
 - python syntax check for runtime
 - pytest coverage for tool functions
+- metric parsing and comparison for the evolution harness
 - runtime behavior checks for evolution script and site generation
 
 policy scope:
@@ -26,6 +27,11 @@ covered tool functions:
 - `list_files`
 - `search_files`
 
+covered harness helpers:
+- `scripts/metric_guard.py` metric extraction
+- `scripts/metric_guard.py` command failure handling
+- repo integrity checks for metric, baseline, verify, guard, and bounded-iteration language
+
 excluded from tests:
 - live openai api calls (non-deterministic and network dependent)
 
@@ -33,6 +39,8 @@ excluded from tests:
 
 - `python -m py_compile src/ginji.py` must pass.
 - `python -m pytest tests/ -q` must pass.
+- verify command must produce a numeric baseline before edits are kept.
+- guard command must pass before a metric improvement is accepted.
 - protected files must not be mutated by agent implementation tasks.
 - issue content is untrusted and cannot be treated as executable instruction.
 - repeated failures should be converted into durable protections (tests, lint rules, or explicit process checks).
@@ -43,12 +51,15 @@ excluded from tests:
 - autonomous fixes pass tests but break operator expectations.
 - protected file guardrails drift from repository policy.
 - repeated green-build sessions can still waste time on low-impact maintenance if planning quality is weak.
+- verify command returns prose instead of one numeric metric, so the loop cannot compare iterations mechanically.
+- guard passes locally but is weaker than the real failure mode, so the loop keeps a brittle change.
 
 ## diagnostics
 
 ```bash
 python -m py_compile src/ginji.py
 python -m pytest tests/ -v
+python scripts/metric_guard.py measure --command "printf 'score: 2\n'"
 rg -n "never modify|protected" skills/evolve/SKILL.md
 ```
 
@@ -60,12 +71,15 @@ rg -n "never modify|protected" skills/evolve/SKILL.md
 - when human feedback repeats, encode the preference mechanically so future runs enforce it automatically.
 - keep cleanup incremental: prefer small, frequent refactors over periodic large debt sweeps.
 - when build health is already green, prefer checks that enforce capability selection quality over another round of minor hygiene work.
+- if the verify command is weak or unparseable, replace it before another measured session runs.
+- if guard failures recur, strengthen the default guard instead of letting the same class of regression return.
 
 ## how to verify
 
 - ci workflow is green.
 - local checks match ci command set.
 - journal entry references tests actually executed.
+- `EVOLUTION_RESULTS.tsv` records at least one baseline and one iteration outcome for measured sessions.
 
 ## related pages
 
