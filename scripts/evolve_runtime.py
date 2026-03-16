@@ -357,7 +357,7 @@ def main() -> int:
     birth_date = env("BIRTH_DATE", "2026-03-07")
     ginji_bin = env("GINJI_BIN", "python src/ginji.py")
     build_check = env("BUILD_CHECK", "python -m py_compile src/ginji.py && python -m pytest tests/ -q")
-    default_verify = env("DEFAULT_VERIFY", "python -m pytest tests/ --collect-only -q 2>/dev/null | tail -n 1 | awk '{print $1}'")
+    default_verify = env("DEFAULT_VERIFY", "python scripts/capability_score.py")
     timeout = int(env("TIMEOUT", "1200"))
     impl_timeout = int(env("IMPL_TIMEOUT", "900"))
     next_day = int(env("GINJI_NEXT_DAY", "1"))
@@ -390,6 +390,7 @@ choose one improvement only for this session.
 prefer the highest-leverage capability-building improvement if the build is already healthy.
 do not spend a healthy session on syntax cleanup, error handling, or input validation alone unless that issue is actively blocking another capability.
 tie the chosen improvement to one benchmark ability a real coding agent needs: navigation, multi-file editing, test execution, git workflow, repo context, or recovery from failures.
+the verify command is now python scripts/capability_score.py which scores capability dimensions: git (weight 4), recovery (3), edit (3), exec (2), nav (2), search (2), harness (1). each dimension is capped at 3 tests. the git dimension currently scores 0 — any session that adds a passing git-workflow test earns the single largest score gain available.
 write this exact machine-readable header first, one field per line, with single-line values:
 goal: ...
 benchmark_gap: ...
