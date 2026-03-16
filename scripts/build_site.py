@@ -317,6 +317,11 @@ def build_css() -> str:
   --text-dim: #4a3560;
   --purple: #c084fc;
   --pink: #f472b6;
+  --glass-fill: rgba(18, 13, 29, 0.58);
+  --glass-stroke: rgba(192, 132, 252, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.085);
+  --glass-shadow: rgba(6, 3, 12, 0.22);
+  --glass-sheen: rgba(244, 114, 182, 0.08);
   --font: "JetBrains Mono", "Fira Code", monospace;
 }
 
@@ -329,6 +334,11 @@ def build_css() -> str:
   --text-dim: #8e7ca3;
   --purple: #7b4cd8;
   --pink: #c54e8d;
+  --glass-fill: rgba(255, 255, 255, 0.52);
+  --glass-stroke: rgba(123, 76, 216, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.72);
+  --glass-shadow: rgba(76, 54, 118, 0.12);
+  --glass-sheen: rgba(123, 76, 216, 0.065);
 }
 
 * { box-sizing: border-box; }
@@ -359,14 +369,47 @@ nav {
   gap: 12px;
   align-items: center;
   padding: 13px 18px;
-  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--glass-stroke);
   border-radius: 14px;
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  box-shadow: 0 16px 36px rgba(6, 3, 12, 0.22);
+  background:
+    linear-gradient(180deg, var(--glass-highlight), transparent 36%),
+    linear-gradient(135deg, var(--glass-sheen), transparent 52%),
+    var(--glass-fill);
+  backdrop-filter: blur(22px) saturate(155%);
+  -webkit-backdrop-filter: blur(22px) saturate(155%);
+  box-shadow:
+    0 18px 42px var(--glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(8, 5, 14, 0.12);
   max-width: 640px;
   margin: 12px auto 0;
+}
+
+nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 14% 0%, color-mix(in srgb, var(--purple) 24%, transparent), transparent 34%),
+    radial-gradient(circle at 84% 100%, color-mix(in srgb, var(--pink) 16%, transparent), transparent 30%);
+  opacity: 0.65;
+  pointer-events: none;
+  z-index: -2;
+}
+
+nav::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.34), transparent);
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .nav-name { color: var(--purple); font-weight: 700; }
@@ -436,13 +479,32 @@ section[id] { scroll-margin-top: 112px; }
 }
 
 .status-card {
-  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--glass-stroke);
   border-radius: 14px;
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  box-shadow: 0 14px 28px rgba(6, 3, 12, 0.14);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--glass-highlight) 80%, transparent), transparent 38%),
+    linear-gradient(150deg, color-mix(in srgb, var(--glass-sheen) 85%, transparent), transparent 54%),
+    var(--glass-fill);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  box-shadow:
+    0 14px 28px color-mix(in srgb, var(--glass-shadow) 80%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.11),
+    inset 0 -1px 0 rgba(8, 5, 14, 0.08);
   padding: 9px 12px;
+}
+
+.status-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--purple) 18%, transparent), transparent 34%);
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .status-label {
