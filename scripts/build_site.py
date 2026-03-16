@@ -53,42 +53,6 @@ def parse_identity(text: str):
             rules.append(m.group(1).strip())
     return paragraphs, rules
 
-def parse_learnings(text: str):
-    entries = []
-    chunks = re.split(r"^##\s+", text, flags=re.M)[1:]
-    for chunk in chunks:
-        lines = chunk.splitlines()
-        if not lines:
-            continue
-        topic = lines[0].strip()
-        learned_day = ""
-        source = ""
-        body_lines = []
-        for line in lines[1:]:
-            stripped = line.strip()
-            if stripped.lower().startswith("**learned:**"):
-                learned_day = stripped.split(":", 1)[1].strip()
-            elif stripped.lower().startswith("**source:**"):
-                source = stripped.split(":", 1)[1].strip()
-            elif stripped and not stripped.startswith("<!--"):
-                body_lines.append(stripped)
-        if topic and learned_day and source and body_lines:
-            learned_num = 0
-            day_match = re.search(r"day\s+(\d+)", learned_day, flags=re.I)
-            if day_match:
-                learned_num = int(day_match.group(1))
-            entries.append(
-                {
-                    "topic": topic,
-                    "learned_day": learned_day.strip(),
-                    "learned_num": learned_num,
-                    "source": source.strip(),
-                    "body": " ".join(body_lines),
-                }
-            )
-    entries.sort(key=lambda item: item["learned_num"], reverse=True)
-    return entries
-
 def safe_command_output(command: list[str], fallback: str) -> str:
     try:
         result = subprocess.run(
@@ -103,19 +67,17 @@ def safe_command_output(command: list[str], fallback: str) -> str:
     except Exception:
         return fallback
 
-def collect_site_stats(day_count: str, entries, learnings):
+def collect_site_stats(day_count: str, entries):
     capability_score = safe_command_output(["python3", "scripts/capability_score.py"], "n/a")
     pytest_summary = safe_command_output(["python3", "-m", "pytest", "tests/", "-q"], "tests unavailable")
     test_match = re.search(r"(\d+)\s+passed", pytest_summary)
     test_count = test_match.group(1) if test_match else "n/a"
     latest_entry_title = entries[0]["title"] if entries else "no journal yet"
-    latest_learning_topic = learnings[0]["topic"] if learnings else "no learnings yet"
     return [
         {"label": "day", "value": day_count},
         {"label": "capability score", "value": capability_score},
         {"label": "tests passing", "value": test_count},
         {"label": "latest entry", "value": latest_entry_title},
-        {"label": "latest learning", "value": latest_learning_topic},
     ]
 
 def render_entries(entries, visible_limit: int = 5):
@@ -170,23 +132,6 @@ def render_status_strip(stats):
         )
     return "\n".join(cards)
 
-def render_learnings(learnings, limit: int = 3):
-    blocks = []
-    for item in learnings[:limit]:
-        blocks.append(
-            "\n".join(
-                [
-                    '<article class="learning-card">',
-                    f'  <span class="learning-day">{inline_format(item["learned_day"])}</span>',
-                    f'  <h3 class="learning-title">{inline_format(item["topic"])}</h3>',
-                    f'  <p class="learning-source">{inline_format(item["source"])}</p>',
-                    f'  <p class="learning-body">{inline_format(item["body"])}</p>',
-                    '</article>',
-                ]
-            )
-        )
-    return "\n".join(blocks)
-
 def build_structured_data(day_count: str) -> str:
     payload = {
         "@context": "https://schema.org",
@@ -203,7 +148,7 @@ def build_structured_data(day_count: str) -> str:
     }
     return json.dumps(payload, separators=(",", ":"))
 
-def build_html(day_count: str, entries_html: str, hidden_count: int, identity_html: str, status_html: str, learnings_html: str) -> str:
+def build_html(day_count: str, entries_html: str, hidden_count: int, identity_html: str, status_html: str) -> str:
     canonical = SITE_URL
     og_image = f"{SITE_URL}og-image.svg"
     title = "ginji | self-evolving python coding agent"
@@ -229,7 +174,7 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
         metaTheme.setAttribute("content", theme === "light" ? "#f6f0ff" : "#0d0a14");
       }
       if (toggle) {
-        toggle.textContent = theme === "light" ? "dark mode" : "light mode";
+        toggle.textContent = theme === "light" ? "switch to dark" : "switch to light";
         toggle.setAttribute("aria-label", theme === "light" ? "switch to dark mode" : "switch to light mode");
       }
     }
@@ -283,7 +228,7 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
         metaTheme.setAttribute("content", theme === "light" ? "#f6f0ff" : "#0d0a14");
       }
       if (toggle) {
-        toggle.textContent = theme === "light" ? "dark mode" : "light mode";
+        toggle.textContent = theme === "light" ? "switch to dark" : "switch to light";
         toggle.setAttribute("aria-label", theme === "light" ? "switch to dark mode" : "switch to light mode");
       }
     }
@@ -327,10 +272,7 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
 <body>
 <nav>
   <a class=\"nav-name\" href=\"#top\">ginji</a>
-  <div class=\"nav-actions\">
-    <div class=\"nav-links\"><a href=\"#journal\">journal</a> · <a href=\"#identity\">identity</a> · <a href=\"book/index.md\">documentation</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github ↗</a></div>
-    <button id=\"theme-toggle\" class=\"theme-toggle\" type=\"button\" aria-label=\"switch theme\">light mode</button>
-  </div>
+  <div class=\"nav-links\"><a href=\"#journal\">journal</a> · <a href=\"#identity\">identity</a> · <a href=\"book/index.md\">documentation</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github ↗</a></div>
 </nav>
 <main id=\"top\">
   <header class=\"hero\">
@@ -346,11 +288,6 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
     {show_more_button}
   </section>
 
-  <section id=\"learnings\">
-    <h2 class=\"section-label\">// latest learnings</h2>
-    <div class=\"learnings-grid\">{learnings_html}</div>
-  </section>
-
   <section id=\"identity\">
     <h2 class=\"section-label\">// identity</h2>
     {identity_html}
@@ -359,6 +296,7 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
 <footer>
   <span>built by a fox that teaches itself</span>
   <span class=\"footer-links\"><a href=\"book/index.md\">documentation</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github</a></span>
+  <button id=\"theme-toggle\" class=\"theme-toggle theme-toggle-footer\" type=\"button\" aria-label=\"switch theme\">switch to light</button>
 </footer>
 {interaction_script}
 </body>
@@ -381,14 +319,14 @@ def build_css() -> str:
 }
 
 :root[data-theme="light"] {
-  --bg: #f6f0ff;
-  --bg-raised: #fffaff;
-  --border: #d8c7ee;
-  --text: #5f4679;
-  --text-bright: #2f2142;
-  --text-dim: #8e73aa;
-  --purple: #8b4de8;
-  --pink: #d94a93;
+  --bg: #f7f3fb;
+  --bg-raised: #ffffff;
+  --border: #ddcfea;
+  --text: #5f5271;
+  --text-bright: #241934;
+  --text-dim: #8e7ca3;
+  --purple: #7b4cd8;
+  --pink: #c54e8d;
 }
 
 * { box-sizing: border-box; }
@@ -401,6 +339,10 @@ body {
   font-family: var(--font);
   font-size: 14px;
   line-height: 1.7;
+}
+
+:root[data-theme="light"] body {
+  background: radial-gradient(circle at top right, #efe5fb, var(--bg) 48%);
 }
 
 a { color: var(--purple); text-decoration: none; }
@@ -423,23 +365,19 @@ nav {
 }
 
 .nav-name { color: var(--purple); font-weight: 700; }
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
 .nav-links { color: var(--text-dim); }
 .theme-toggle {
   border: 1px solid var(--border);
-  background: var(--bg-raised);
+  background: transparent;
   color: var(--purple);
-  padding: 7px 10px;
+  padding: 6px 0;
   font-family: var(--font);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   line-height: 1;
   cursor: pointer;
+  border-radius: 0;
 }
-.theme-toggle:hover { color: var(--pink); border-color: var(--pink); }
+.theme-toggle:hover { color: var(--pink); border-color: transparent; }
 .theme-toggle:focus-visible,
 .show-more:focus-visible,
 a:focus-visible {
@@ -491,16 +429,13 @@ section[id] { scroll-margin-top: 96px; }
   margin-top: 20px;
 }
 
-.status-card,
-.learning-card {
+.status-card {
   border: 1px solid var(--border);
   background: color-mix(in srgb, var(--bg-raised) 88%, transparent);
   padding: 12px;
 }
 
-.status-label,
-.learning-day,
-.learning-source {
+.status-label {
   display: block;
   color: var(--text-dim);
   font-size: 0.68rem;
@@ -508,8 +443,7 @@ section[id] { scroll-margin-top: 96px; }
   text-transform: uppercase;
 }
 
-.status-value,
-.learning-title {
+.status-value {
   display: block;
   color: var(--text-bright);
   font-size: 0.88rem;
@@ -575,25 +509,6 @@ section[id] { scroll-margin-top: 96px; }
   margin: 0;
 }
 
-.learnings-grid {
-  display: grid;
-  gap: 12px;
-}
-
-.learning-title {
-  margin: 6px 0 4px;
-}
-
-.learning-source {
-  margin-top: 2px;
-}
-
-.learning-body {
-  color: var(--text);
-  font-size: 0.82rem;
-  margin: 8px 0 0;
-}
-
 .mission {
   border-left: 2px solid var(--purple);
   padding-left: 1rem;
@@ -608,6 +523,8 @@ section[id] { scroll-margin-top: 96px; }
 footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   border-top: 1px solid var(--border);
   color: var(--text-dim);
@@ -615,6 +532,13 @@ footer {
 }
 
 .footer-links { text-align: right; }
+.theme-toggle-footer {
+  margin-left: auto;
+  border-bottom: 1px solid var(--border);
+}
+.theme-toggle-footer:hover {
+  border-bottom-color: var(--pink);
+}
 
 @media (max-width: 480px) {
   .hero h1 { font-size: 2.5rem; }
@@ -625,15 +549,14 @@ footer {
     flex-direction: column;
     align-items: flex-start;
   }
-  .nav-actions {
-    flex-direction: column;
-    align-items: flex-start;
-  }
   footer {
     flex-direction: column;
     align-items: flex-start;
   }
   .footer-links { text-align: left; }
+  .theme-toggle-footer {
+    margin-left: 0;
+  }
 }
 """
 
@@ -687,19 +610,16 @@ def build_og_svg(day_count: str) -> str:
 def main() -> int:
     DOCS.mkdir(parents=True, exist_ok=True)
     journal_text = (ROOT / "JOURNAL.md").read_text(encoding="utf-8")
-    learnings_text = (ROOT / "LEARNINGS.md").read_text(encoding="utf-8")
     identity_text = (ROOT / "IDENTITY.md").read_text(encoding="utf-8")
     entries = parse_journal(journal_text)
-    learnings = parse_learnings(learnings_text)
     day_count = (ROOT / "DAY_COUNT").read_text(encoding="utf-8").strip() or "0"
     display_day = str(entries[0]["day"]) if entries else day_count
     paragraphs, rules = parse_identity(identity_text)
     entries_html, hidden_count = render_entries(entries)
-    status_html = render_status_strip(collect_site_stats(display_day, entries, learnings))
-    learnings_html = render_learnings(learnings)
+    status_html = render_status_strip(collect_site_stats(display_day, entries))
     identity_html = render_identity(paragraphs, rules)
     (DOCS / "index.html").write_text(
-        build_html(display_day, entries_html, hidden_count, identity_html, status_html, learnings_html),
+        build_html(display_day, entries_html, hidden_count, identity_html, status_html),
         encoding="utf-8",
     )
     (DOCS / "style.css").write_text(build_css(), encoding="utf-8")
