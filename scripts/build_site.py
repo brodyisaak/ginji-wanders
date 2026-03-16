@@ -2,6 +2,7 @@
 import html
 import json
 import re
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -52,6 +53,71 @@ def parse_identity(text: str):
             rules.append(m.group(1).strip())
     return paragraphs, rules
 
+def parse_learnings(text: str):
+    entries = []
+    chunks = re.split(r"^##\s+", text, flags=re.M)[1:]
+    for chunk in chunks:
+        lines = chunk.splitlines()
+        if not lines:
+            continue
+        topic = lines[0].strip()
+        learned_day = ""
+        source = ""
+        body_lines = []
+        for line in lines[1:]:
+            stripped = line.strip()
+            if stripped.lower().startswith("**learned:**"):
+                learned_day = stripped.split(":", 1)[1].strip()
+            elif stripped.lower().startswith("**source:**"):
+                source = stripped.split(":", 1)[1].strip()
+            elif stripped and not stripped.startswith("<!--"):
+                body_lines.append(stripped)
+        if topic and learned_day and source and body_lines:
+            learned_num = 0
+            day_match = re.search(r"day\s+(\d+)", learned_day, flags=re.I)
+            if day_match:
+                learned_num = int(day_match.group(1))
+            entries.append(
+                {
+                    "topic": topic,
+                    "learned_day": learned_day.strip(),
+                    "learned_num": learned_num,
+                    "source": source.strip(),
+                    "body": " ".join(body_lines),
+                }
+            )
+    entries.sort(key=lambda item: item["learned_num"], reverse=True)
+    return entries
+
+def safe_command_output(command: list[str], fallback: str) -> str:
+    try:
+        result = subprocess.run(
+            command,
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        value = result.stdout.strip()
+        return value or fallback
+    except Exception:
+        return fallback
+
+def collect_site_stats(day_count: str, entries, learnings):
+    capability_score = safe_command_output(["python3", "scripts/capability_score.py"], "n/a")
+    pytest_summary = safe_command_output(["python3", "-m", "pytest", "tests/", "-q"], "tests unavailable")
+    test_match = re.search(r"(\d+)\s+passed", pytest_summary)
+    test_count = test_match.group(1) if test_match else "n/a"
+    latest_entry_title = entries[0]["title"] if entries else "no journal yet"
+    latest_learning_topic = learnings[0]["topic"] if learnings else "no learnings yet"
+    return [
+        {"label": "day", "value": day_count},
+        {"label": "capability score", "value": capability_score},
+        {"label": "tests passing", "value": test_count},
+        {"label": "latest entry", "value": latest_entry_title},
+        {"label": "latest learning", "value": latest_learning_topic},
+    ]
+
 def render_entries(entries, visible_limit: int = 5):
     parts = []
     hidden_count = 0
@@ -89,6 +155,38 @@ def render_identity(paragraphs, rules):
         blocks.append("</ol>")
     return "\n".join(blocks)
 
+def render_status_strip(stats):
+    cards = []
+    for item in stats:
+        cards.append(
+            "\n".join(
+                [
+                    '<div class="status-card">',
+                    f'  <span class="status-label">{inline_format(item["label"])}</span>',
+                    f'  <span class="status-value">{inline_format(item["value"])}</span>',
+                    '</div>',
+                ]
+            )
+        )
+    return "\n".join(cards)
+
+def render_learnings(learnings, limit: int = 3):
+    blocks = []
+    for item in learnings[:limit]:
+        blocks.append(
+            "\n".join(
+                [
+                    '<article class="learning-card">',
+                    f'  <span class="learning-day">{inline_format(item["learned_day"])}</span>',
+                    f'  <h3 class="learning-title">{inline_format(item["topic"])}</h3>',
+                    f'  <p class="learning-source">{inline_format(item["source"])}</p>',
+                    f'  <p class="learning-body">{inline_format(item["body"])}</p>',
+                    '</article>',
+                ]
+            )
+        )
+    return "\n".join(blocks)
+
 def build_structured_data(day_count: str) -> str:
     payload = {
         "@context": "https://schema.org",
@@ -105,7 +203,7 @@ def build_structured_data(day_count: str) -> str:
     }
     return json.dumps(payload, separators=(",", ":"))
 
-def build_html(day_count: str, entries_html: str, hidden_count: int, identity_html: str) -> str:
+def build_html(day_count: str, entries_html: str, hidden_count: int, identity_html: str, status_html: str, learnings_html: str) -> str:
     canonical = SITE_URL
     og_image = f"{SITE_URL}og-image.svg"
     title = "ginji | self-evolving python coding agent"
@@ -115,9 +213,37 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
         if hidden_count > 0
         else ""
     )
-    show_more_script = """
+    interaction_script = """
 <script>
   (function () {
+    const root = document.documentElement;
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    const toggle = document.getElementById("theme-toggle");
+    const storedTheme = window.localStorage.getItem("ginji-theme");
+    const preferredDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const initialTheme = storedTheme || (preferredDark ? "dark" : "light");
+
+    function syncTheme(theme) {
+      root.setAttribute("data-theme", theme);
+      if (metaTheme) {
+        metaTheme.setAttribute("content", theme === "light" ? "#f6f0ff" : "#0d0a14");
+      }
+      if (toggle) {
+        toggle.textContent = theme === "light" ? "dark mode" : "light mode";
+        toggle.setAttribute("aria-label", theme === "light" ? "switch to dark mode" : "switch to light mode");
+      }
+    }
+
+    syncTheme(initialTheme);
+
+    if (toggle) {
+      toggle.addEventListener("click", function () {
+        const nextTheme = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+        window.localStorage.setItem("ginji-theme", nextTheme);
+        syncTheme(nextTheme);
+      });
+    }
+
     const button = document.getElementById("show-more");
     if (!button) return;
     button.addEventListener("click", function () {
@@ -129,6 +255,40 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
   })();
 </script>
 """ if hidden_count > 0 else ""
+    if not hidden_count:
+        interaction_script = """
+<script>
+  (function () {
+    const root = document.documentElement;
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    const toggle = document.getElementById("theme-toggle");
+    const storedTheme = window.localStorage.getItem("ginji-theme");
+    const preferredDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const initialTheme = storedTheme || (preferredDark ? "dark" : "light");
+
+    function syncTheme(theme) {
+      root.setAttribute("data-theme", theme);
+      if (metaTheme) {
+        metaTheme.setAttribute("content", theme === "light" ? "#f6f0ff" : "#0d0a14");
+      }
+      if (toggle) {
+        toggle.textContent = theme === "light" ? "dark mode" : "light mode";
+        toggle.setAttribute("aria-label", theme === "light" ? "switch to dark mode" : "switch to light mode");
+      }
+    }
+
+    syncTheme(initialTheme);
+
+    if (toggle) {
+      toggle.addEventListener("click", function () {
+        const nextTheme = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+        window.localStorage.setItem("ginji-theme", nextTheme);
+        syncTheme(nextTheme);
+      });
+    }
+  })();
+</script>
+"""
     return f"""<!doctype html>
 <html lang=\"en\">
 <head>
@@ -156,19 +316,28 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
 <body>
 <nav>
   <a class=\"nav-name\" href=\"#top\">ginji</a>
-  <div class=\"nav-links\"><a href=\"#journal\">journal</a> · <a href=\"#identity\">identity</a> · <a href=\"book/index.md\">documentation</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github ↗</a></div>
+  <div class=\"nav-actions\">
+    <div class=\"nav-links\"><a href=\"#journal\">journal</a> · <a href=\"#identity\">identity</a> · <a href=\"book/index.md\">documentation</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github ↗</a></div>
+    <button id=\"theme-toggle\" class=\"theme-toggle\" type=\"button\" aria-label=\"switch theme\">light mode</button>
+  </div>
 </nav>
 <main id=\"top\">
   <header class=\"hero\">
     <h1>ginji<span class=\"cursor\">_</span></h1>
     <p class=\"day-count\">day {day_count}</p>
     <p class=\"tagline\">a small fox, finding its way in public</p>
+    <div class=\"status-strip\">{status_html}</div>
   </header>
 
   <section id=\"journal\">
     <h2 class=\"section-label\">// journal</h2>
     <div class=\"timeline\">{entries_html}</div>
     {show_more_button}
+  </section>
+
+  <section id=\"learnings\">
+    <h2 class=\"section-label\">// latest learnings</h2>
+    <div class=\"learnings-grid\">{learnings_html}</div>
   </section>
 
   <section id=\"identity\">
@@ -180,7 +349,7 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
   <span>built by a fox that teaches itself</span>
   <span class=\"footer-links\"><a href=\"book/index.md\">documentation</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">architecture wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github</a></span>
 </footer>
-{show_more_script}
+{interaction_script}
 </body>
 </html>
 """
@@ -198,6 +367,17 @@ def build_css() -> str:
   --purple: #c084fc;
   --pink: #f472b6;
   --font: "JetBrains Mono", "Fira Code", monospace;
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f0ff;
+  --bg-raised: #fffaff;
+  --border: #d8c7ee;
+  --text: #5f4679;
+  --text-bright: #2f2142;
+  --text-dim: #8e73aa;
+  --purple: #8b4de8;
+  --pink: #d94a93;
 }
 
 * { box-sizing: border-box; }
@@ -232,7 +412,29 @@ nav {
 }
 
 .nav-name { color: var(--purple); font-weight: 700; }
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .nav-links { color: var(--text-dim); }
+.theme-toggle {
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--purple);
+  padding: 7px 10px;
+  font-family: var(--font);
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.theme-toggle:hover { color: var(--pink); border-color: var(--pink); }
+.theme-toggle:focus-visible,
+.show-more:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 2px;
+}
 
 main,
 footer {
@@ -269,6 +471,38 @@ section[id] { scroll-margin-top: 96px; }
   color: var(--text-dim);
   font-style: italic;
   font-size: 0.85rem;
+}
+
+.status-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.status-card,
+.learning-card {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-raised) 88%, transparent);
+  padding: 12px;
+}
+
+.status-label,
+.learning-day,
+.learning-source {
+  display: block;
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.status-value,
+.learning-title {
+  display: block;
+  color: var(--text-bright);
+  font-size: 0.88rem;
+  margin-top: 4px;
 }
 
 .section-label {
@@ -330,6 +564,25 @@ section[id] { scroll-margin-top: 96px; }
   margin: 0;
 }
 
+.learnings-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.learning-title {
+  margin: 6px 0 4px;
+}
+
+.learning-source {
+  margin-top: 2px;
+}
+
+.learning-body {
+  color: var(--text);
+  font-size: 0.82rem;
+  margin: 8px 0 0;
+}
+
 .mission {
   border-left: 2px solid var(--purple);
   padding-left: 1rem;
@@ -356,7 +609,12 @@ footer {
   .hero h1 { font-size: 2.5rem; }
   html { scroll-padding-top: 130px; }
   section[id] { scroll-margin-top: 130px; }
+  .status-strip { grid-template-columns: 1fr; }
   nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nav-actions {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -418,13 +676,21 @@ def build_og_svg(day_count: str) -> str:
 def main() -> int:
     DOCS.mkdir(parents=True, exist_ok=True)
     journal_text = (ROOT / "JOURNAL.md").read_text(encoding="utf-8")
+    learnings_text = (ROOT / "LEARNINGS.md").read_text(encoding="utf-8")
     identity_text = (ROOT / "IDENTITY.md").read_text(encoding="utf-8")
     entries = parse_journal(journal_text)
+    learnings = parse_learnings(learnings_text)
     day_count = (ROOT / "DAY_COUNT").read_text(encoding="utf-8").strip() or "0"
     display_day = str(entries[0]["day"]) if entries else day_count
     paragraphs, rules = parse_identity(identity_text)
     entries_html, hidden_count = render_entries(entries)
-    (DOCS / "index.html").write_text(build_html(display_day, entries_html, hidden_count, render_identity(paragraphs, rules)), encoding="utf-8")
+    status_html = render_status_strip(collect_site_stats(display_day, entries, learnings))
+    learnings_html = render_learnings(learnings)
+    identity_html = render_identity(paragraphs, rules)
+    (DOCS / "index.html").write_text(
+        build_html(display_day, entries_html, hidden_count, identity_html, status_html, learnings_html),
+        encoding="utf-8",
+    )
     (DOCS / "style.css").write_text(build_css(), encoding="utf-8")
     (DOCS / ".nojekyll").write_text("", encoding="utf-8")
     (DOCS / "robots.txt").write_text(build_robots(), encoding="utf-8")

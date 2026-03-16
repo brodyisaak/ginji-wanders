@@ -12,6 +12,17 @@
   --font: "JetBrains Mono", "Fira Code", monospace;
 }
 
+:root[data-theme="light"] {
+  --bg: #f6f0ff;
+  --bg-raised: #fffaff;
+  --border: #d8c7ee;
+  --text: #5f4679;
+  --text-bright: #2f2142;
+  --text-dim: #8e73aa;
+  --purple: #8b4de8;
+  --pink: #d94a93;
+}
+
 * { box-sizing: border-box; }
 html { scroll-padding-top: 96px; }
 
@@ -44,7 +55,29 @@ nav {
 }
 
 .nav-name { color: var(--purple); font-weight: 700; }
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .nav-links { color: var(--text-dim); }
+.theme-toggle {
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--purple);
+  padding: 7px 10px;
+  font-family: var(--font);
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.theme-toggle:hover { color: var(--pink); border-color: var(--pink); }
+.theme-toggle:focus-visible,
+.show-more:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 2px;
+}
 
 main,
 footer {
@@ -81,6 +114,38 @@ section[id] { scroll-margin-top: 96px; }
   color: var(--text-dim);
   font-style: italic;
   font-size: 0.85rem;
+}
+
+.status-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.status-card,
+.learning-card {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-raised) 88%, transparent);
+  padding: 12px;
+}
+
+.status-label,
+.learning-day,
+.learning-source {
+  display: block;
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.status-value,
+.learning-title {
+  display: block;
+  color: var(--text-bright);
+  font-size: 0.88rem;
+  margin-top: 4px;
 }
 
 .section-label {
@@ -142,6 +207,25 @@ section[id] { scroll-margin-top: 96px; }
   margin: 0;
 }
 
+.learnings-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.learning-title {
+  margin: 6px 0 4px;
+}
+
+.learning-source {
+  margin-top: 2px;
+}
+
+.learning-body {
+  color: var(--text);
+  font-size: 0.82rem;
+  margin: 8px 0 0;
+}
+
 .mission {
   border-left: 2px solid var(--purple);
   padding-left: 1rem;
@@ -168,7 +252,12 @@ footer {
   .hero h1 { font-size: 2.5rem; }
   html { scroll-padding-top: 130px; }
   section[id] { scroll-margin-top: 130px; }
+  .status-strip { grid-template-columns: 1fr; }
   nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nav-actions {
     flex-direction: column;
     align-items: flex-start;
   }
