@@ -419,7 +419,7 @@ nav {
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
   box-shadow: 0 16px 36px rgba(6, 3, 12, 0.22);
-  max-width: 640px;
+  width: min(640px, calc(100% - 28px));
   margin: 12px auto 0;
 }
 
@@ -668,6 +668,7 @@ footer {
   nav {
     top: 8px;
     margin-top: 8px;
+    width: calc(100% - 14px);
     padding: 10px 12px;
     gap: 10px;
     align-items: center;
