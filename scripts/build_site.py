@@ -118,22 +118,34 @@ def render_identity(paragraphs, rules):
     return "\n".join(blocks)
 
 def render_status_strip(stats):
-    cards = []
+    metric_items = []
+    entry_value = ""
     for item in stats:
-        classes = "status-card"
         if item["label"] == "latest entry":
-            classes += " status-card--wide status-card--entry"
-        cards.append(
+            entry_value = inline_format(item["value"])
+            continue
+        metric_items.append(
             "\n".join(
                 [
-                    f'<div class="{classes}">',
-                    f'  <span class="status-label">{inline_format(item["label"])}</span>',
-                    f'  <span class="status-value">{inline_format(item["value"])}</span>',
+                    '<div class="proof-metric">',
+                    f'  <span class="proof-label">{inline_format(item["label"])}</span>',
+                    f'  <span class="proof-value">{inline_format(item["value"])}</span>',
                     '</div>',
                 ]
             )
         )
-    return "\n".join(cards)
+    return "\n".join(
+        [
+            '<div class="proof-panel">',
+            '  <div class="proof-kicker">progress at a glance</div>',
+            f'  <div class="proof-metrics">{"".join(metric_items)}</div>',
+            '  <div class="proof-feature">',
+            '    <span class="proof-feature-label">latest entry</span>',
+            f'    <span class="proof-feature-value">{entry_value}</span>',
+            '  </div>',
+            '</div>',
+        ]
+    )
 
 def build_structured_data(day_count: str) -> str:
     payload = {
@@ -480,36 +492,37 @@ section[id] { scroll-margin-top: 112px; }
 }
 
 .status-strip {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
   margin-top: 24px;
   width: min(100%, 600px);
 }
 
-.status-card {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
-  border-radius: 16px;
-  background: var(--panel);
-  backdrop-filter: blur(14px) saturate(130%);
-  -webkit-backdrop-filter: blur(14px) saturate(130%);
-  box-shadow: 0 14px 26px rgba(8, 5, 16, 0.12);
-  padding: 10px 12px 11px;
-  min-height: 72px;
+.proof-panel {
+  border-top: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  padding: 14px 0 0;
 }
 
-.status-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text-bright) 32%, transparent), transparent);
-  opacity: 0.7;
+.proof-kicker {
+  color: var(--text-dim);
+  font-size: 0.56rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
-.status-label {
+.proof-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 68%, transparent);
+}
+
+.proof-metric {
+  min-width: 0;
+}
+
+.proof-label {
   display: block;
   color: var(--text-dim);
   font-size: 0.56rem;
@@ -517,21 +530,34 @@ section[id] { scroll-margin-top: 112px; }
   text-transform: uppercase;
 }
 
-.status-value {
+.proof-value {
   display: block;
   color: var(--text-bright);
-  font-size: 0.8rem;
-  margin-top: 5px;
-  line-height: 1.45;
+  font-size: 1rem;
+  margin-top: 7px;
+  line-height: 1.2;
 }
 
-.status-card--wide {
-  grid-column: 1 / -1;
+.proof-feature {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 0 2px;
 }
 
-.status-card--entry .status-value {
-  font-size: 0.76rem;
+.proof-feature-label {
+  color: var(--text-dim);
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.proof-feature-value {
   color: color-mix(in srgb, var(--text-bright) 94%, var(--purple) 6%);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  max-width: 30rem;
 }
 
 .section-label {
@@ -725,33 +751,32 @@ footer {
   }
   .status-strip {
     width: 100%;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
     margin-top: 18px;
   }
-  .status-card {
-    padding: 8px 9px;
-    min-height: 66px;
-    border-radius: 12px;
+  .proof-panel {
+    padding-top: 12px;
   }
-  .status-label {
+  .proof-kicker,
+  .proof-label,
+  .proof-feature-label {
     font-size: 0.48rem;
   }
-  .status-value {
-    font-size: 0.65rem;
-    line-height: 1.34;
+  .proof-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 14px;
+    padding-bottom: 12px;
   }
-  .status-card .status-value {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
+  .proof-value {
+    font-size: 0.88rem;
+    margin-top: 6px;
   }
-  .status-card--wide {
-    grid-column: 1 / -1;
+  .proof-feature {
+    gap: 8px;
+    padding-top: 12px;
   }
-  .status-card--entry .status-value {
-    -webkit-line-clamp: 3;
+  .proof-feature-value {
+    font-size: 0.76rem;
+    max-width: none;
   }
   .entry:first-child .entry-content {
     padding: 11px 12px 13px;
