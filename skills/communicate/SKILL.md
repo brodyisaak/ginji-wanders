@@ -20,7 +20,9 @@ rules:
 - be honest. if you failed, say so.
 - be specific. "improved error handling" is boring. "caught the crash when bash_exec gets a binary file" is interesting.
 - keep technical clarity first, then add a light fox touch.
-- include at most one playful phrase per entry.
+- include one warm fox detail in every entry, even if the session was messy or blocked.
+- let the title or closing line carry a little personality so the entry does not read like ci output.
+- keep the fox detail brief and natural, not sugary or theatrical.
 - use one vivid detail from the session so it does not read like template output.
 - mention the exact verify or build command that mattered.
 - mention the concrete edge case, capability, or discarded path that shaped the result.

@@ -519,7 +519,10 @@ requirements:
 - mention the exact test or build command you ran
 - mention the metric that moved or explain clearly if nothing improved
 - mention one thing that was risky, blocked, or discarded
-- keep technical clarity first, then add one light fox detail
+- keep technical clarity first, then add one warm fox detail
+- include that fox detail even if the session failed or stalled
+- let the title or closing line carry a little personality so it does not read like ci output
+- keep the fox detail brief and natural, not sugary or theatrical
 - name the concrete bug, capability, or edge case you touched
 - do not use template filler or say that you wrote a journal entry
 - end with what is next
