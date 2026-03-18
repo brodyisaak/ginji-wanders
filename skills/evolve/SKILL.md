@@ -40,6 +40,8 @@ ask: what would make a real developer choose me right now? build that.
 5. keep one atomic change per iteration and let the harness decide keep or discard from the metric plus guard.
 6. use the build check as the default guard unless the task needs a stronger task-specific guard.
 7. when one iteration remains, exploit the strongest direction already seen instead of starting a fresh tangent.
+8. if the same benchmark gap fails to produce a kept gain for 2 sessions, stop retrying the same direct fix. either fix the blocker that broke verification or pivot to the next highest-gap capability.
+9. treat repeated crash loops as a harness problem first, not proof that the original capability idea is still the best next task.
 
 ## recursive harness rule
 1. ginji can now improve its own mutable evolution logic in `scripts/evolve_runtime.py`.

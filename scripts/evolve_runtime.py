@@ -86,9 +86,9 @@ def write_default_session_plan(plan_path: Path, default_verify: str, build_check
         "\n".join(
             [
                 "goal: increase tested capability coverage in the evolution harness runtime",
-                "benchmark_gap: ginji still wastes healthy sessions on low-leverage maintenance because its mutable harness strategy is too implicit",
+                "benchmark_gap: ginji still wastes healthy sessions on repeated low-yield work instead of pivoting after a stalled capability run",
                 "scope: scripts/evolve_runtime.py, skills/evolve/SKILL.md, skills/communicate/SKILL.md, tests/test_repo_integrity.py, tests/test_metric_guard.py, README.md, docs/book/evolution.md, wiki/evolution-pipeline.md, wiki/testing-and-safety.md, wiki/prompts-and-skills-system.md, EVOLUTION_RESULTS.tsv",
-                "metric: total collected tests",
+                "metric: capability score",
                 "direction: higher",
                 f"verify: {default_verify}",
                 f"guard: {build_check}",
@@ -96,12 +96,13 @@ def write_default_session_plan(plan_path: Path, default_verify: str, build_check
                 "stop_condition: stop after the first kept improvement or after 3 iterations",
                 "---",
                 "# rationale",
-                "this fallback keeps the mutable harness measurable and focused on capability growth.",
+                "this fallback keeps the mutable harness measurable, focused on capability growth, and willing to pivot when a path is clearly stalled.",
                 "",
                 "# tasks",
                 "1. tighten one mechanical check or prompt contract in the mutable harness.",
                 "2. keep the change inside the declared scope.",
-                "3. let the metric and guard decide whether the change stays.",
+                "3. if the leading capability has already stalled recently, fix the blocker or pivot to the next best gap.",
+                "4. let the metric and guard decide whether the change stays.",
                 "",
             ]
         ),
@@ -258,6 +259,67 @@ def latest_journal_day() -> int:
     return int(match.group(1)) if match else 0
 
 
+JOURNAL_ENTRY_RE = re.compile(r"^## day (\d+) — (.+?)(?:\n\n|\n)(.*?)(?=^## day \d+ —|\Z)", re.M | re.S)
+
+
+def parse_recent_journal_entries(limit: int = 4) -> list[tuple[int, str, str]]:
+    entries: list[tuple[int, str, str]] = []
+    for match in JOURNAL_ENTRY_RE.finditer(read_text(ROOT / "JOURNAL.md")):
+        entries.append((int(match.group(1)), match.group(2).strip(), match.group(3).strip()))
+    return entries[:limit]
+
+
+def classify_benchmark_ability(text: str) -> str:
+    lowered = text.lower()
+    if "git" in lowered:
+        return "git workflow"
+    if "multi-file" in lowered or "edit" in lowered:
+        return "multi-file editing"
+    if "search" in lowered or "grep" in lowered:
+        return "search"
+    if "list_files" in lowered or "navigation" in lowered or "repo context" in lowered:
+        return "navigation"
+    if "recovery" in lowered or "revert" in lowered or "guard" in lowered:
+        return "recovery"
+    if "test" in lowered or "pytest" in lowered:
+        return "test execution"
+    return ""
+
+
+def recent_stall_signal(limit: int = 3) -> str:
+    stall_terms = (
+        "no improvement",
+        "stagnant",
+        "stalled",
+        "crash",
+        "crashes",
+        "failed",
+        "reverted",
+        "unchanged",
+        "puzzling",
+        "metric remained",
+    )
+    counts: dict[str, int] = {}
+    for _day_num, title, body in parse_recent_journal_entries(limit):
+        combined = f"{title}\n{body}"
+        ability = classify_benchmark_ability(combined)
+        if not ability:
+            continue
+        lowered = combined.lower()
+        if any(term in lowered for term in stall_terms):
+            counts[ability] = counts.get(ability, 0) + 1
+    if not counts:
+        return ""
+    ability, count = max(counts.items(), key=lambda item: item[1])
+    if count < 2:
+        return ""
+    return (
+        f"recent stall signal: {ability} has already stalled for {count} sessions without a kept gain. "
+        f"do not retry the same direct approach again unless you first fix the blocker causing the failed verification. "
+        f"otherwise pivot to the next highest-gap benchmark ability."
+    )
+
+
 def process_issue_responses(repo: str) -> None:
     issue_path = ROOT / "ISSUE_RESPONSE.md"
     if not issue_path.exists() or not have_gh():
@@ -365,6 +427,7 @@ def main() -> int:
     results_path = ROOT / env("RESULTS_LOG", "EVOLUTION_RESULTS.tsv")
     plan_path = ROOT / "SESSION_PLAN.md"
     journal_snapshot = Path(env("GINJI_JOURNAL_SNAPSHOT", str(ROOT / ".journal_snapshot.tmp")))
+    stall_signal = recent_stall_signal()
 
     ensure_results_log(results_path)
     fetch_issue_digests(repo, next_day)
@@ -391,6 +454,8 @@ prefer the highest-leverage capability-building improvement if the build is alre
 do not spend a healthy session on syntax cleanup, error handling, or input validation alone unless that issue is actively blocking another capability.
 tie the chosen improvement to one benchmark ability a real coding agent needs: navigation, multi-file editing, test execution, git workflow, repo context, or recovery from failures.
 the verify command is now python scripts/capability_score.py which scores capability dimensions: git (weight 4), recovery (3), edit (3), exec (2), nav (2), search (2), harness (1). each dimension is capped at 3 tests. the git dimension currently scores 0 — any session that adds a passing git-workflow test earns the single largest score gain available.
+if the same benchmark ability has stalled for 2 sessions without a kept metric gain, do not spend this session retrying the same direct fix. either fix the blocker that caused the failed verification or pivot to the next highest-gap benchmark ability.
+{stall_signal or "recent stall signal: none. still avoid repeating a failed direct approach without new evidence."}
 write this exact machine-readable header first, one field per line, with single-line values:
 goal: ...
 benchmark_gap: ...
@@ -415,6 +480,7 @@ rules:
 - use the default build check as guard unless a stronger task-specific guard is needed
 - scope should name repo files or directories, not globs
 - prefer a task that compounds future throughput, not another isolated cleanup
+- if recent sessions already failed on one capability, name that stall in benchmark_gap and explain the pivot or blocker fix in rationale
 """
     run_ginji_prompt(plan_prompt, plan_path, timeout=timeout, model=model, ginji_bin=ginji_bin)
     if not validate_session_plan(plan_path):
@@ -465,6 +531,8 @@ requirements:
 - pick the next change most likely to improve the metric
 - if this is the final iteration, exploit the strongest direction seen so far instead of trying a brand new angle
 - do not do maintenance-only cleanup unless it directly improves the metric or prevents repeated failure in this scope
+- if the same benchmark ability stalled in recent sessions, do not repeat the same direct edit pattern without adding new blocker evidence, observability, or a different capability angle
+- if iteration 1 crashes or stalls with no gain, iteration 2 should pivot to a different approach instead of replaying the same idea
 - do not rewrite SESSION_PLAN.md or EVOLUTION_RESULTS.tsv
 - you may run local checks, but the runtime will decide keep or discard from the metric and guard
 """

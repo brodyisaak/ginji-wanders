@@ -71,6 +71,8 @@ def test_evolution_rules_prioritize_capability_growth():
     assert "prefer improvements that move ginji toward real coding-agent utility" in evolve_skill
     assert "do not spend a healthy session on syntax cleanup, error handling, or input validation alone" in evolve_runtime
     assert "benchmark ability a real coding agent needs" in evolve_runtime
+    assert "if the same benchmark gap fails to produce a kept gain for 2 sessions" in evolve_skill
+    assert "if the same benchmark ability has stalled for 2 sessions without a kept metric gain" in evolve_runtime
 
 
 def test_journal_prompt_requires_specifics():

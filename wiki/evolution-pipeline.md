@@ -36,6 +36,7 @@ out of scope:
    - `guard`
    - `iteration_budget`
    - `stop_condition`
+   - recent stall context from the latest journal entries when a benchmark ability has repeated without a kept gain
 7. runtime dry-runs the verify command and captures a numeric baseline before any edits.
 8. runtime appends a baseline row to `EVOLUTION_RESULTS.tsv`.
 9. runtime runs a bounded metric loop, default `3` iterations:
@@ -60,6 +61,7 @@ out of scope:
 - plan generation fails and leaves weak task guidance.
 - plan generation omits a required metric field or produces a verify command that cannot be parsed.
 - planning chooses another low-leverage hygiene task even though the build is already green.
+- planning keeps retrying the same benchmark ability after 2 stalled sessions instead of fixing the blocker or pivoting.
 - verify command fails before baseline, leaving the session without a measurable starting point.
 - scope restore fails and leaves discarded iteration changes in the worktree.
 - implementation modifies protected files indirectly.
@@ -83,6 +85,7 @@ cat ISSUE_RESPONSE.md
 
 - if the plan is invalid, rewrite `SESSION_PLAN.md` or fall back to the default measured plan.
 - if baseline capture fails, switch to the default verify command and regenerate the session plan.
+- if the same benchmark ability has stalled for 2 sessions, treat the next session as a blocker-fix or pivot session instead of another direct retry.
 - if an iteration crashes or fails the guard, restore the scoped snapshot before moving on.
 - if the runtime misbehaves, leave the kernel unchanged and fix `scripts/evolve_runtime.py` first.
 - if validation fails repeatedly, restore `src/` and `tests/` and rerun checks.

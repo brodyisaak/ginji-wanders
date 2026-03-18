@@ -5,6 +5,7 @@
 session flow:
 - kernel: verify secrets, run preflight build, enforce pacific day guard, and preserve journal history
 - runtime: `scripts/evolve_runtime.py` reads identity, personality, source, memory, and issue digest, then writes a measured session contract
+- anti-stall planning: runtime reads recent journal history and should pivot when the same benchmark ability has stalled across multiple sessions
 - baseline: runtime runs the verify command once and captures a numeric starting point
 - implementation: runtime executes a bounded iteration loop and keeps only metric-improving changes that also pass the guard
 - validation: kernel reruns `py_compile` and `pytest` before publish
