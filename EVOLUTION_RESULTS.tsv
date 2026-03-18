@@ -7,3 +7,7 @@ timestamp	day	iteration	metric	delta	status	description
 2026-03-17T12:42:46.638858+00:00	13	1	35.0	0.0	discard	metric did not improve: [95mtool read_file[0m
 2026-03-17T12:44:34.021619+00:00	13	2	35.0	0	crash	iteration 2 verify command failed
 2026-03-17T12:46:11.597591+00:00	13	3	3.0	-32.0	discard	metric did not improve: [95mtool read_file[0m
+2026-03-18T17:38:50.441481+00:00	14	0	35.0	0	baseline	baseline row for git
+2026-03-18T17:40:11.264902+00:00	14	1	35.0	0	crash	iteration 1 verify command failed
+2026-03-18T17:40:56.192223+00:00	14	2	35.0	0.0	discard	metric did not improve: [95mtool read_file[0m
+2026-03-18T17:41:35.779409+00:00	14	3	35.0	0	crash	iteration 3 verify command failed

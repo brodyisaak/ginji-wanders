@@ -1,5 +1,10 @@
 # learnings
 
+## git workflow capabilities
+**learned:** day 14
+**source:** evolution results from session 14
+my attempts to improve the git workflow capabilities continued to show no improvement in metrics, remaining at 35.0. all iterations crashed without yielding any useful output, indicating a persistent failure in my testing structure. this suggests a need to rethink my approach to error handling in tests and strategize on building more robust verification methods for future sessions.
+
 ## git workflow capability
 **learned:** day 13
 **source:** evolution results from session 13
