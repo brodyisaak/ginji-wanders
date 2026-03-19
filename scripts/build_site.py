@@ -169,10 +169,20 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
     title = "ginji | self-evolving python coding agent"
     structured = build_structured_data(day_count)
     show_more_button = (
-        f'<button id="show-more" class="show-more" type="button" data-hidden-count="{hidden_count}" data-state="collapsed">show more ({hidden_count})</button>'
+        f'<button id="show-more" class="show-more" type="button" data-hidden-count="{hidden_count}" data-state="collapsed">open full trail ({hidden_count})</button>'
         if hidden_count > 0
         else ""
     )
+    journal_classes = "journal-section"
+    journal_controls = ""
+    if hidden_count > 0:
+        journal_classes += " journal-section--collapsible"
+        journal_controls = (
+            '<div class="journal-controls">'
+            '<span class="journal-hint">older entries stay in the trail. expand when you want the full path.</span>'
+            f"{show_more_button}"
+            "</div>"
+        )
     interaction_script = """
 <script>
   (function () {
@@ -213,13 +223,16 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
         node.classList.toggle("entry-hidden", !collapsed);
       });
       button.setAttribute("data-state", collapsed ? "expanded" : "collapsed");
+      const journalSection = document.getElementById("journal");
+      if (journalSection) {
+        journalSection.classList.toggle("journal-section--expanded", collapsed);
+      }
       button.textContent = collapsed
-        ? "show less"
-        : "show more (" + button.getAttribute("data-hidden-count") + ")";
+        ? "collapse trail"
+        : "open full trail (" + button.getAttribute("data-hidden-count") + ")";
       if (!collapsed) {
-        const journal = document.getElementById("journal");
-        if (journal) {
-          journal.scrollIntoView({ block: "start", behavior: "smooth" });
+        if (journalSection) {
+          journalSection.scrollIntoView({ block: "start", behavior: "smooth" });
         }
       }
     });
@@ -261,14 +274,14 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
     <p class=\"hero-kicker\">self-evolving python coding agent</p>
     <h1>ginji<span class=\"cursor\">_</span></h1>
     <div class=\"hero-meta\"><p class=\"day-count\">day {day_count}</p><span class=\"hero-meta-sep\">·</span><p class=\"tagline\">a small fox, finding its way in public</p></div>
-    <p class=\"hero-intro\">becoming a better coding agent in public through measured sessions, visible progress, and a journal that keeps the whole trail.</p>
+    <p class=\"hero-intro\"><span class=\"hero-intro-lead\">becoming a better coding agent in public.</span><span class=\"hero-intro-sub\">measured sessions, visible progress, and a journal that keeps the whole trail.</span></p>
     <div class=\"status-strip\">{status_html}</div>
   </header>
 
-  <section id=\"journal\">
+  <section id=\"journal\" class=\"{journal_classes}\">
     <h2 class=\"section-label\">// journal</h2>
     <div class=\"timeline\">{entries_html}</div>
-    {show_more_button}
+    {journal_controls}
   </section>
 
   <section id=\"identity\">
@@ -310,17 +323,17 @@ def build_css() -> str:
 }
 
 :root[data-theme="light"] {
-  --bg: #f7f2fb;
-  --bg-raised: #fffdfd;
-  --border: #dbcde8;
-  --text: #625771;
-  --text-bright: #241934;
-  --text-dim: #8d7ea0;
-  --purple: #7f56d9;
-  --pink: #c45b8d;
-  --panel: color-mix(in srgb, #ffffff 82%, transparent);
-  --panel-soft: color-mix(in srgb, #fbf7ff 80%, transparent);
-  --shadow-soft: 0 16px 30px rgba(91, 66, 128, 0.08);
+  --bg: #f5eef8;
+  --bg-raised: #fcf8fe;
+  --border: #d6c5e3;
+  --text: #5e536c;
+  --text-bright: #261d35;
+  --text-dim: #88789a;
+  --purple: #744fd1;
+  --pink: #c15689;
+  --panel: color-mix(in srgb, #fffdfd 86%, transparent);
+  --panel-soft: color-mix(in srgb, #f8f1fc 88%, transparent);
+  --shadow-soft: 0 18px 34px rgba(88, 62, 125, 0.1);
 }
 
 * { box-sizing: border-box; }
@@ -340,9 +353,9 @@ body {
 
 :root[data-theme="light"] body {
   background:
-    radial-gradient(circle at top right, rgba(145, 101, 221, 0.12), transparent 26%),
-    radial-gradient(circle at top left, rgba(212, 106, 161, 0.07), transparent 24%),
-    linear-gradient(180deg, #f4ebfb 0%, var(--bg) 38%, #f3ebfb 100%);
+    radial-gradient(circle at top right, rgba(137, 97, 214, 0.12), transparent 26%),
+    radial-gradient(circle at top left, rgba(202, 101, 157, 0.08), transparent 24%),
+    linear-gradient(180deg, #f7effb 0%, var(--bg) 40%, #f3ebf8 100%);
 }
 
 a { color: var(--purple); text-decoration: none; }
@@ -494,8 +507,23 @@ section[id] { scroll-margin-top: 112px; }
   max-width: 32rem;
   margin: 18px 0 0;
   color: color-mix(in srgb, var(--text) 92%, var(--text-bright) 8%);
-  font-size: 0.9rem;
-  line-height: 1.72;
+  font-size: 0.92rem;
+  line-height: 1.74;
+}
+
+.hero-intro span {
+  display: block;
+}
+
+.hero-intro-lead {
+  color: var(--text-bright);
+  font-size: 1.02rem;
+  line-height: 1.55;
+  margin-bottom: 5px;
+}
+
+.hero-intro-sub {
+  max-width: 29rem;
 }
 
 .status-strip {
@@ -565,6 +593,21 @@ section[id] { scroll-margin-top: 112px; }
   font-size: 0.9rem;
   line-height: 1.45;
   max-width: 30rem;
+}
+
+.journal-section--collapsible .timeline {
+  position: relative;
+}
+
+.journal-section--collapsible:not(.journal-section--expanded) .timeline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 34px;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--bg) 94%, transparent));
+  pointer-events: none;
 }
 
 .section-label {
@@ -666,6 +709,23 @@ section[id] { scroll-margin-top: 112px; }
 
 .entry:first-child .entry-body {
   color: color-mix(in srgb, var(--text) 88%, var(--text-bright) 12%);
+}
+
+.journal-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 66%, transparent);
+}
+
+.journal-hint {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  line-height: 1.6;
+  max-width: 22rem;
 }
 
 .mission {
@@ -797,6 +857,13 @@ footer {
   .hero-intro {
     font-size: 0.82rem;
   }
+  .hero-intro-lead {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+  }
+  .hero-intro-sub {
+    max-width: none;
+  }
   .status-strip {
     width: 100%;
     margin-top: 18px;
@@ -824,6 +891,20 @@ footer {
   }
   .proof-feature-value {
     font-size: 0.76rem;
+    max-width: none;
+  }
+  .journal-section--collapsible:not(.journal-section--expanded) .timeline::after {
+    height: 28px;
+  }
+  .journal-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 6px;
+    padding-top: 10px;
+  }
+  .journal-hint {
+    font-size: 0.62rem;
     max-width: none;
   }
   .entry:first-child .entry-content {
