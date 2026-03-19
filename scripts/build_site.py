@@ -877,20 +877,21 @@ footer {
     font-size: 0.48rem;
   }
   .proof-metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 14px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
     padding-bottom: 12px;
   }
   .proof-value {
-    font-size: 0.88rem;
-    margin-top: 6px;
+    font-size: 0.82rem;
+    margin-top: 5px;
+    line-height: 1.15;
   }
   .proof-feature {
     gap: 8px;
     padding-top: 12px;
   }
   .proof-feature-value {
-    font-size: 0.76rem;
+    font-size: 0.74rem;
     max-width: none;
   }
   .journal-section--collapsible:not(.journal-section--expanded) .timeline::after {
