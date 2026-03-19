@@ -147,6 +147,43 @@ def render_status_strip(stats):
         ]
     )
 
+def render_beta_metrics(stats):
+    items = []
+    for item in stats[:3]:
+        items.append(
+            "\n".join(
+                [
+                    '<div class="beta-signal">',
+                    f'  <span class="beta-signal-label">{inline_format(item["label"])}</span>',
+                    f'  <span class="beta-signal-value">{inline_format(item["value"])}</span>',
+                    '</div>',
+                ]
+            )
+        )
+    return "\n".join(items)
+
+def render_beta_trail(entries, limit: int = 3):
+    cards = []
+    for entry in entries[:limit]:
+        cards.append(
+            "\n".join(
+                [
+                    '<article class="beta-trail-card">',
+                    f'  <span class="beta-trail-day">day {entry["day"]}</span>',
+                    f'  <h3 class="beta-trail-title">{inline_format(entry["title"])}</h3>',
+                    f'  <p class="beta-trail-body">{inline_format(entry["body"])}</p>',
+                    '</article>',
+                ]
+            )
+        )
+    return "\n".join(cards)
+
+def render_beta_rules(rules, limit: int = 4):
+    items = []
+    for rule in rules[:limit]:
+        items.append(f"<li>{inline_format(rule)}</li>")
+    return "\n".join(items)
+
 def build_structured_data(day_count: str) -> str:
     payload = {
         "@context": "https://schema.org",
@@ -295,11 +332,152 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
     <span class=\"footer-note\">built by a fox that teaches itself</span>
   </div>
   <div class=\"footer-actions\">
-    <span class=\"footer-links\"><a href=\"book/index.md\">docs</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github</a></span>
+    <span class=\"footer-links\"><a href=\"book/index.md\">docs</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github</a> · <a class=\"footer-beta-link\" href=\"beta.html\">beta ↗</a></span>
     <button id=\"theme-toggle\" class=\"theme-toggle theme-toggle-footer\" type=\"button\" aria-label=\"switch theme\">light mode</button>
   </div>
 </footer>
 {interaction_script}
+</body>
+</html>
+"""
+
+def build_beta_html(day_count: str, stats, entries, paragraphs, rules) -> str:
+    canonical = f"{SITE_URL}beta.html"
+    og_image = f"{SITE_URL}og-image.svg"
+    latest_title = inline_format(entries[0]["title"]) if entries else "still gathering a trail"
+    latest_body = inline_format(entries[0]["body"]) if entries else "ginji is still waking up."
+    mission = inline_format(paragraphs[0]) if paragraphs else SITE_DESC
+    beta_metrics = render_beta_metrics(stats)
+    beta_trail = render_beta_trail(entries)
+    beta_rules = render_beta_rules(rules)
+    structured = build_structured_data(day_count)
+    return f"""<!doctype html>
+<html lang=\"en\">
+<head>
+  <meta charset=\"utf-8\" />
+  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+  <title>ginji beta | editorial prototype</title>
+  <meta name=\"description\" content=\"A beta editorial version of the ginji site, built around live journal data and a more cinematic product story.\" />
+  <meta name=\"robots\" content=\"index,follow,max-image-preview:large\" />
+  <meta name=\"theme-color\" content=\"#0b0812\" />
+  <link rel=\"canonical\" href=\"{canonical}\" />
+  <meta property=\"og:type\" content=\"website\" />
+  <meta property=\"og:title\" content=\"ginji beta | editorial prototype\" />
+  <meta property=\"og:description\" content=\"A more cinematic beta surface for ginji, built from the same live journal data.\" />
+  <meta property=\"og:url\" content=\"{canonical}\" />
+  <meta property=\"og:image\" content=\"{og_image}\" />
+  <meta name=\"twitter:card\" content=\"summary_large_image\" />
+  <meta name=\"twitter:title\" content=\"ginji beta | editorial prototype\" />
+  <meta name=\"twitter:description\" content=\"A more cinematic beta surface for ginji, built from the same live journal data.\" />
+  <meta name=\"twitter:image\" content=\"{og_image}\" />
+  <link rel=\"stylesheet\" href=\"beta.css\" />
+  <script type=\"application/ld+json\">{structured}</script>
+</head>
+<body class=\"beta-body\">
+  <div class=\"beta-shell\">
+    <header class=\"beta-nav\">
+      <a class=\"beta-wordmark\" href=\"index.html\">ginji</a>
+      <div class=\"beta-nav-links\">
+        <a href=\"index.html\">main site</a>
+        <a href=\"book/index.md\">docs</a>
+        <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">wiki</a>
+        <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github ↗</a>
+      </div>
+    </header>
+
+    <main class=\"beta-main\">
+      <section class=\"beta-hero\">
+        <div class=\"beta-copy\">
+          <p class=\"beta-kicker\">beta prototype</p>
+          <h1 class=\"beta-title\">ginji, with a longer stride.</h1>
+          <p class=\"beta-lead\">a self-evolving coding agent, told like a living case study instead of a utility page.</p>
+          <p class=\"beta-body-copy\">{mission}</p>
+          <div class=\"beta-capabilities\">
+            <span>journal-led progress</span>
+            <span>measured capability growth</span>
+            <span>public development trail</span>
+            <span>self-editing runtime</span>
+          </div>
+          <div class=\"beta-actions\">
+            <a class=\"beta-button beta-button-primary\" href=\"index.html\">return to live site</a>
+            <a class=\"beta-button beta-button-secondary\" href=\"#trail\">read the trail</a>
+          </div>
+        </div>
+        <div class=\"beta-stage\">
+          <div class=\"beta-stage-glow\"></div>
+          <div class=\"beta-stage-card beta-stage-card-main\">
+            <span class=\"beta-stage-label\">latest trail note</span>
+            <h2>{latest_title}</h2>
+            <p>{latest_body}</p>
+          </div>
+          <div class=\"beta-stage-card beta-stage-card-signals\">
+            <span class=\"beta-stage-label\">live signals</span>
+            <div class=\"beta-signals\">{beta_metrics}</div>
+          </div>
+          <div class=\"beta-stage-card beta-stage-card-marquee\" aria-hidden=\"true\">
+            <div class=\"beta-marquee-track\">
+              <span>journal</span><span>capability</span><span>recovery</span><span>runtime</span><span>search</span><span>git</span>
+              <span>journal</span><span>capability</span><span>recovery</span><span>runtime</span><span>search</span><span>git</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class=\"beta-section beta-overview\">
+        <div class=\"beta-section-heading\">
+          <span class=\"beta-kicker\">progress frame</span>
+          <h2>proof without the dashboard glare.</h2>
+        </div>
+        <div class=\"beta-overview-grid\">
+          <div class=\"beta-overview-panel\">
+            <span class=\"beta-panel-label\">where ginji is now</span>
+            <p>day {day_count}, a capability score of {inline_format(stats[1]["value"])}, and {inline_format(stats[2]["value"])} tests keeping the floor steady.</p>
+          </div>
+          <div class=\"beta-overview-panel\">
+            <span class=\"beta-panel-label\">why this beta exists</span>
+            <p>to test a more cinematic reading of the same live repo: less terminal utility, more authored momentum and motion.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id=\"trail\" class=\"beta-section beta-trail\">
+        <div class=\"beta-section-heading\">
+          <span class=\"beta-kicker\">recent trail</span>
+          <h2>the latest sessions, surfaced with more room to breathe.</h2>
+        </div>
+        <div class=\"beta-trail-grid\">
+          {beta_trail}
+        </div>
+      </section>
+
+      <section class=\"beta-section beta-identity\">
+        <div class=\"beta-section-heading\">
+          <span class=\"beta-kicker\">identity</span>
+          <h2>still the same fox, just framed with more intent.</h2>
+        </div>
+        <div class=\"beta-identity-grid\">
+          <div class=\"beta-identity-copy\">
+            <p>{mission}</p>
+          </div>
+          <ol class=\"beta-rule-list\">
+            {beta_rules}
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <footer class=\"beta-footer\">
+      <div>
+        <span class=\"beta-footer-kicker\">beta track</span>
+        <p>an alternate ginji surface guided by editorial pacing, stronger motion cues, and a more immersive top story.</p>
+      </div>
+      <div class=\"beta-footer-links\">
+        <a href=\"index.html\">main site</a>
+        <a href=\"book/index.md\">docs</a>
+        <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github</a>
+      </div>
+    </footer>
+  </div>
 </body>
 </html>
 """
@@ -784,6 +962,15 @@ footer {
 .footer-links a {
   color: var(--text-bright);
 }
+.footer-beta-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  margin-left: 6px;
+}
 .theme-toggle-footer {
   border: 0;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
@@ -948,6 +1135,538 @@ footer {
 }
 """
 
+def build_beta_css() -> str:
+    return """@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+:root {
+  --bg: #0b0812;
+  --bg-soft: #120d1b;
+  --bg-panel: rgba(22, 16, 33, 0.76);
+  --bg-panel-strong: rgba(18, 12, 28, 0.92);
+  --border: rgba(188, 150, 245, 0.16);
+  --border-strong: rgba(223, 121, 186, 0.22);
+  --text: #b7a8cb;
+  --text-bright: #f3e8ff;
+  --text-dim: #766687;
+  --purple: #c08dff;
+  --pink: #e57bb4;
+  --font-body: "JetBrains Mono", monospace;
+  --font-display: "Space Grotesk", "JetBrains Mono", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-body);
+  background:
+    radial-gradient(circle at 12% 14%, rgba(203, 120, 184, 0.16), transparent 22%),
+    radial-gradient(circle at 85% 12%, rgba(124, 89, 221, 0.22), transparent 28%),
+    radial-gradient(circle at 60% 60%, rgba(80, 48, 143, 0.16), transparent 30%),
+    linear-gradient(180deg, #09070f 0%, #0f0b17 40%, #0b0812 100%);
+}
+
+a { color: inherit; text-decoration: none; }
+
+.beta-shell {
+  width: min(1200px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 18px 0 42px;
+}
+
+.beta-nav,
+.beta-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.beta-nav {
+  position: sticky;
+  top: 12px;
+  z-index: 20;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  background: rgba(15, 10, 23, 0.74);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  box-shadow: 0 20px 44px rgba(6, 4, 11, 0.24);
+}
+
+.beta-wordmark {
+  color: var(--purple);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.12rem;
+  letter-spacing: -0.04em;
+}
+
+.beta-nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 16px;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.beta-nav-links a:hover,
+.beta-button:hover,
+.beta-footer-links a:hover {
+  color: var(--pink);
+}
+
+.beta-main {
+  padding-top: 34px;
+}
+
+.beta-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 34px;
+  align-items: stretch;
+}
+
+.beta-copy {
+  padding: 10px 6px 0 2px;
+}
+
+.beta-kicker,
+.beta-panel-label,
+.beta-stage-label,
+.beta-footer-kicker {
+  display: inline-block;
+  color: var(--text-dim);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.beta-title,
+.beta-section-heading h2 {
+  margin: 14px 0 0;
+  color: var(--text-bright);
+  font-family: var(--font-display);
+  line-height: 0.96;
+  letter-spacing: -0.055em;
+}
+
+.beta-title {
+  font-size: clamp(3.6rem, 7vw, 6.8rem);
+  max-width: 10ch;
+}
+
+.beta-lead {
+  max-width: 31rem;
+  margin: 18px 0 0;
+  color: var(--text-bright);
+  font-size: 1.08rem;
+  line-height: 1.5;
+}
+
+.beta-body-copy {
+  max-width: 30rem;
+  margin: 16px 0 0;
+  color: color-mix(in srgb, var(--text) 92%, var(--text-bright) 8%);
+  font-size: 0.88rem;
+  line-height: 1.9;
+}
+
+.beta-capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.beta-capabilities span,
+.beta-trail-day {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(22, 16, 33, 0.52);
+  color: var(--text-bright);
+  font-size: 0.68rem;
+}
+
+.beta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.beta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--border);
+}
+
+.beta-button-primary {
+  background: linear-gradient(135deg, rgba(192, 141, 255, 0.18), rgba(229, 123, 180, 0.16));
+  color: var(--text-bright);
+  border-color: rgba(201, 146, 255, 0.3);
+}
+
+.beta-button-secondary {
+  background: rgba(22, 16, 33, 0.46);
+  color: var(--text);
+}
+
+.beta-stage {
+  position: relative;
+  min-height: 680px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 36px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(229, 123, 180, 0.12), transparent 18%),
+    radial-gradient(circle at 85% 18%, rgba(166, 122, 255, 0.18), transparent 24%),
+    linear-gradient(180deg, rgba(20, 14, 31, 0.96), rgba(12, 9, 20, 0.9));
+  overflow: hidden;
+}
+
+.beta-stage-glow {
+  position: absolute;
+  inset: auto auto 90px 60px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(214, 120, 188, 0.22), rgba(114, 80, 195, 0.05) 58%, transparent 72%);
+  filter: blur(12px);
+  animation: betaPulse 9s ease-in-out infinite alternate;
+}
+
+.beta-stage-card {
+  position: absolute;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--bg-panel);
+  backdrop-filter: blur(20px) saturate(130%);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
+  box-shadow: 0 22px 42px rgba(4, 3, 10, 0.22);
+}
+
+.beta-stage-card-main {
+  top: 34px;
+  left: 34px;
+  width: min(72%, 420px);
+  padding: 26px 24px 24px;
+  animation: betaFloatA 8s ease-in-out infinite;
+}
+
+.beta-stage-card-main h2 {
+  margin: 14px 0 10px;
+  color: var(--text-bright);
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.6vw, 2.7rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.beta-stage-card-main p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.85;
+}
+
+.beta-stage-card-signals {
+  right: 28px;
+  bottom: 120px;
+  width: min(62%, 360px);
+  padding: 20px 20px 18px;
+  animation: betaFloatB 10s ease-in-out infinite;
+}
+
+.beta-signals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.beta-signal {
+  padding: 14px 12px;
+  border: 1px solid rgba(188, 150, 245, 0.12);
+  border-radius: 18px;
+  background: rgba(12, 9, 20, 0.42);
+}
+
+.beta-signal-label {
+  display: block;
+  color: var(--text-dim);
+  font-size: 0.48rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.beta-signal-value {
+  display: block;
+  margin-top: 8px;
+  color: var(--text-bright);
+  font-size: 1rem;
+}
+
+.beta-stage-card-marquee {
+  left: 42px;
+  bottom: 38px;
+  width: min(58%, 420px);
+  padding: 14px 0;
+  overflow: hidden;
+}
+
+.beta-marquee-track {
+  display: flex;
+  gap: 26px;
+  width: max-content;
+  color: rgba(243, 232, 255, 0.78);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: -0.03em;
+  padding-left: 18px;
+  animation: betaMarquee 20s linear infinite;
+}
+
+.beta-section {
+  margin-top: 80px;
+}
+
+.beta-section-heading {
+  display: grid;
+  gap: 10px;
+  max-width: 42rem;
+}
+
+.beta-section-heading h2 {
+  font-size: clamp(2rem, 4vw, 3.6rem);
+}
+
+.beta-overview-grid,
+.beta-identity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.beta-overview-panel,
+.beta-identity-copy,
+.beta-rule-list,
+.beta-trail-card {
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--bg-panel-strong);
+  padding: 24px 22px;
+}
+
+.beta-overview-panel p,
+.beta-identity-copy p,
+.beta-trail-body,
+.beta-rule-list {
+  margin: 14px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.9;
+}
+
+.beta-trail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.beta-trail-title {
+  margin: 16px 0 8px;
+  color: var(--text-bright);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.beta-rule-list {
+  padding-left: 42px;
+  margin: 0;
+}
+
+.beta-footer {
+  margin-top: 86px;
+  padding: 24px 4px 4px;
+  border-top: 1px solid var(--border);
+}
+
+.beta-footer p {
+  max-width: 34rem;
+  margin: 12px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.8;
+}
+
+.beta-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 16px;
+  color: var(--text-dim);
+  font-size: 0.76rem;
+}
+
+@keyframes betaFloatA {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -10px, 0); }
+}
+
+@keyframes betaFloatB {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(8px, -12px, 0); }
+}
+
+@keyframes betaPulse {
+  0% { transform: scale(0.94); opacity: 0.7; }
+  100% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes betaMarquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (max-width: 920px) {
+  .beta-shell {
+    width: calc(100% - 20px);
+    padding-top: 10px;
+  }
+  .beta-nav,
+  .beta-footer {
+    padding-inline: 16px;
+  }
+  .beta-hero,
+  .beta-overview-grid,
+  .beta-identity-grid,
+  .beta-trail-grid {
+    grid-template-columns: 1fr;
+  }
+  .beta-stage {
+    min-height: 560px;
+  }
+  .beta-stage-card-main,
+  .beta-stage-card-signals,
+  .beta-stage-card-marquee {
+    position: relative;
+    width: auto;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    margin-top: 14px;
+  }
+  .beta-stage-card-main { margin-top: 0; }
+  .beta-signals {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .beta-shell {
+    width: calc(100% - 14px);
+    padding-bottom: 26px;
+  }
+  .beta-nav {
+    top: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 16px;
+    border-radius: 22px;
+  }
+  .beta-nav-links {
+    gap: 10px;
+    justify-content: flex-start;
+  }
+  .beta-nav-links a {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(20, 14, 31, 0.82);
+    font-size: 0.68rem;
+  }
+  .beta-main {
+    padding-top: 20px;
+  }
+  .beta-title {
+    max-width: none;
+    font-size: 3rem;
+  }
+  .beta-lead {
+    font-size: 0.94rem;
+  }
+  .beta-body-copy,
+  .beta-overview-panel p,
+  .beta-identity-copy p,
+  .beta-trail-body,
+  .beta-rule-list {
+    font-size: 0.74rem;
+    line-height: 1.75;
+  }
+  .beta-stage {
+    min-height: auto;
+    padding: 16px;
+    border-radius: 26px;
+  }
+  .beta-stage-glow {
+    width: 180px;
+    height: 180px;
+    left: 10px;
+    bottom: 24px;
+  }
+  .beta-stage-card {
+    border-radius: 22px;
+    padding: 16px;
+  }
+  .beta-stage-card-main h2 {
+    font-size: 1.8rem;
+  }
+  .beta-signals {
+    grid-template-columns: 1fr;
+  }
+  .beta-section {
+    margin-top: 58px;
+  }
+  .beta-section-heading h2 {
+    font-size: 2.15rem;
+  }
+  .beta-trail-grid {
+    gap: 14px;
+  }
+  .beta-overview-panel,
+  .beta-identity-copy,
+  .beta-rule-list,
+  .beta-trail-card {
+    border-radius: 22px;
+    padding: 18px 16px;
+  }
+  .beta-footer {
+    margin-top: 62px;
+    padding-top: 18px;
+    gap: 18px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .beta-footer-links {
+    justify-content: flex-start;
+  }
+}
+"""
+
 def build_robots() -> str:
     return f"""user-agent: *
 allow: /
@@ -959,6 +1678,7 @@ def build_sitemap() -> str:
     today = datetime.now(timezone.utc).date().isoformat()
     paths = [
         "",
+        "beta.html",
         "book/index.md",
         "book/getting-started.md",
         "book/how-it-works.md",
@@ -1004,18 +1724,24 @@ def main() -> int:
     display_day = str(entries[0]["day"]) if entries else day_count
     paragraphs, rules = parse_identity(identity_text)
     entries_html, hidden_count = render_entries(entries)
-    status_html = render_status_strip(collect_site_stats(display_day, entries))
+    stats = collect_site_stats(display_day, entries)
+    status_html = render_status_strip(stats)
     identity_html = render_identity(paragraphs, rules)
     (DOCS / "index.html").write_text(
         build_html(display_day, entries_html, hidden_count, identity_html, status_html),
         encoding="utf-8",
     )
+    (DOCS / "beta.html").write_text(
+        build_beta_html(display_day, stats, entries, paragraphs, rules),
+        encoding="utf-8",
+    )
     (DOCS / "style.css").write_text(build_css(), encoding="utf-8")
+    (DOCS / "beta.css").write_text(build_beta_css(), encoding="utf-8")
     (DOCS / ".nojekyll").write_text("", encoding="utf-8")
     (DOCS / "robots.txt").write_text(build_robots(), encoding="utf-8")
     (DOCS / "sitemap.xml").write_text(build_sitemap(), encoding="utf-8")
     (DOCS / "og-image.svg").write_text(build_og_svg(display_day), encoding="utf-8")
-    print("site built: docs/index.html, docs/style.css, docs/.nojekyll, docs/robots.txt, docs/sitemap.xml, docs/og-image.svg")
+    print("site built: docs/index.html, docs/beta.html, docs/style.css, docs/beta.css, docs/.nojekyll, docs/robots.txt, docs/sitemap.xml, docs/og-image.svg")
     return 0
 
 if __name__ == "__main__":

@@ -477,6 +477,15 @@ footer {
 .footer-links a {
   color: var(--text-bright);
 }
+.footer-beta-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  margin-left: 6px;
+}
 .theme-toggle-footer {
   border: 0;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
