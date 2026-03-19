@@ -277,7 +277,10 @@ def build_html(day_count: str, entries_html: str, hidden_count: int, identity_ht
   </section>
 </main>
 <footer>
-  <span class=\"footer-note\">built by a fox that teaches itself</span>
+  <div class=\"footer-brand\">
+    <span class=\"footer-kicker\">still growing in public</span>
+    <span class=\"footer-note\">built by a fox that teaches itself</span>
+  </div>
   <div class=\"footer-actions\">
     <span class=\"footer-links\"><a href=\"book/index.md\">docs</a> · <a href=\"{ARCH_WIKI_URL}\" target=\"_blank\" rel=\"noreferrer\">wiki</a> · <a href=\"{GITHUB_URL}\" target=\"_blank\" rel=\"noreferrer\">github</a></span>
     <button id=\"theme-toggle\" class=\"theme-toggle theme-toggle-footer\" type=\"button\" aria-label=\"switch theme\">light mode</button>
@@ -351,9 +354,9 @@ nav {
   z-index: 20;
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 18px;
   align-items: center;
-  padding: 12px 18px;
+  padding: 11px 17px;
   border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
   border-radius: 18px;
   background: var(--panel);
@@ -367,8 +370,8 @@ nav {
 .nav-name {
   color: var(--purple);
   font-weight: 700;
-  font-size: 0.98rem;
-  letter-spacing: -0.02em;
+  font-size: 0.95rem;
+  letter-spacing: -0.03em;
 }
 
 .show-more {
@@ -388,9 +391,10 @@ nav {
   align-items: center;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 9px;
   color: var(--text-dim);
-  font-size: 0.84rem;
+  font-size: 0.78rem;
+  letter-spacing: -0.01em;
 }
 .nav-links a {
   color: var(--text-bright);
@@ -398,7 +402,10 @@ nav {
 .nav-links a:hover {
   color: var(--pink);
 }
-.nav-link-sep { color: color-mix(in srgb, var(--text-dim) 80%, transparent); }
+.nav-link-sep {
+  color: color-mix(in srgb, var(--text-dim) 72%, transparent);
+  transform: translateY(-1px);
+}
 .nav-label-short { display: none; }
 .theme-toggle {
   border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
@@ -562,22 +569,37 @@ section[id] { scroll-margin-top: 112px; }
 
 .section-label {
   color: var(--text-dim);
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  margin: 30px 0 12px;
+  margin: 36px 0 14px;
 }
 
 .timeline {
   position: relative;
-  padding-left: 30px;
-  border-left: 1px solid var(--border);
+  padding-left: 34px;
   padding-top: 4px;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--purple) 26%, transparent),
+    color-mix(in srgb, var(--border) 92%, transparent) 16%,
+    color-mix(in srgb, var(--border) 92%, transparent) 84%,
+    transparent
+  );
 }
 
 .entry {
   position: relative;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 .entry-hidden { display: none; }
 
@@ -589,25 +611,30 @@ section[id] { scroll-margin-top: 112px; }
 }
 
 .entry-marker {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   background: var(--pink);
   position: absolute;
-  left: -32px;
-  top: 8px;
+  left: -38px;
+  top: 7px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--bg) 88%, transparent);
 }
 
 .entry-day {
   color: var(--pink);
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .entry-title {
   color: var(--text-bright);
   font-size: 1.02rem;
-  line-height: 1.35;
-  margin: 4px 0 6px;
+  line-height: 1.32;
+  margin: 7px 0 8px;
+  letter-spacing: -0.02em;
 }
 
 .entry-body {
@@ -615,6 +642,7 @@ section[id] { scroll-margin-top: 112px; }
   font-size: 0.85rem;
   margin: 0;
   max-width: 38rem;
+  line-height: 1.78;
 }
 
 .entry:not(:first-child) .entry-body {
@@ -626,10 +654,10 @@ section[id] { scroll-margin-top: 112px; }
 
 .entry:first-child .entry-content {
   border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
-  border-radius: 16px;
+  border-radius: 18px;
   background: var(--panel-soft);
-  box-shadow: 0 12px 24px rgba(8, 5, 16, 0.08);
-  padding: 12px 14px 14px;
+  box-shadow: 0 14px 28px rgba(8, 5, 16, 0.08);
+  padding: 13px 15px 15px;
 }
 
 .entry:first-child .entry-title {
@@ -656,26 +684,46 @@ footer {
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
-  gap: 18px;
+  gap: 20px;
   border-top: 1px solid var(--border);
   color: var(--text-dim);
   font-size: 0.8rem;
-  padding-top: 22px;
+  padding-top: 26px;
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.footer-kicker {
+  color: var(--text-dim);
+  font-size: 0.56rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .footer-note {
-  max-width: 250px;
+  max-width: 280px;
   line-height: 1.7;
+  color: var(--text-bright);
 }
 
 .footer-actions {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 10px;
+  gap: 12px;
 }
 
-.footer-links { text-align: right; }
+.footer-links {
+  text-align: right;
+  color: var(--text);
+}
+.footer-links a {
+  color: var(--text-bright);
+}
 .theme-toggle-footer {
   border: 0;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
@@ -696,7 +744,7 @@ footer {
     top: 8px;
     margin-top: 8px;
     width: calc(100% - 14px);
-    padding: 10px 12px 11px;
+    padding: 10px 12px 10px;
     gap: 8px;
     align-items: flex-start;
     justify-content: flex-start;
@@ -715,18 +763,18 @@ footer {
     justify-content: flex-start;
     gap: 6px;
     width: 100%;
-    margin-top: 2px;
-    font-size: 0.72rem;
+    margin-top: 3px;
+    font-size: 0.7rem;
   }
   .nav-links a {
     display: inline-flex;
     align-items: center;
     min-height: 30px;
-    padding: 5px 9px;
+    padding: 5px 10px;
     border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
     border-radius: 999px;
     background: var(--panel-soft);
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     white-space: nowrap;
   }
   .nav-link-sep { display: none; }
@@ -783,19 +831,20 @@ footer {
     border-radius: 14px;
   }
   .timeline {
-    padding-left: 24px;
+    padding-left: 26px;
   }
   .entry {
     margin-bottom: 20px;
   }
   .entry-marker {
-    left: -28px;
+    left: -30px;
   }
   .entry-title {
     font-size: 0.92rem;
   }
   .entry-body {
     font-size: 0.8rem;
+    line-height: 1.7;
   }
   .entry:not(:first-child) .entry-body {
     -webkit-line-clamp: 3;
@@ -807,6 +856,9 @@ footer {
   .footer-links { text-align: left; }
   .footer-actions {
     align-items: flex-start;
+  }
+  .footer-note {
+    max-width: none;
   }
   .theme-toggle-footer {
     padding-left: 0;
