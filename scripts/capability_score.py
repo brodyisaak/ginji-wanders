@@ -25,6 +25,10 @@ TEST_TO_DIMENSION = {
     "test_search_files_no_matches": "search",
     "test_search_files_regex_matches_multiple_files": "search",
     "test_search_files_directory_not_found": "recovery",
+    "test_git_init_temp_repo": "git",
+    "test_git_status_temp_repo": "git",
+    "test_git_invalid_command_reports_git_error": "git",
+    "test_git_commit_temp_repo": "git",
 }
 
 WEIGHTS = {

@@ -44,3 +44,15 @@ def test_gap_report_sorts_highest_available_gain_first():
     nav_gap = next(gap for gap in gaps if gap["dimension"] == "nav")
     assert search_gap["available_gain"] == 2
     assert nav_gap["available_gain"] == 2
+
+
+def test_git_tests_are_scored_and_capped():
+    passed = [
+        "tests/test_git_workflow_tests.py::test_git_init_temp_repo",
+        "tests/test_git_workflow_tests.py::test_git_status_temp_repo",
+        "tests/test_git_workflow_tests.py::test_git_invalid_command_reports_git_error",
+        "tests/test_git_workflow_tests.py::test_git_commit_temp_repo",
+    ]
+    counts = capability_score.dimension_counts(passed)
+    assert counts["git"] == 4
+    assert capability_score.score_from_counts(counts) == 12

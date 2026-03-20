@@ -360,6 +360,12 @@ def capability_gap_guidance(snapshot: dict, stalled_ability: str) -> str:
         stalled_dimension = "exec"
 
     open_lanes = [gap for gap in gaps if gap.get("remaining", 0) > 0]
+    if not open_lanes:
+        return (
+            f"current capability snapshot: score {snapshot.get('score', 'n/a')}. "
+            "all scored lanes are currently capped. do not invent busywork. either expand measurable coverage safely, "
+            "reduce false failures in the harness, or improve a real capability in a way that can earn a new counted test."
+        )
     best_open = ", ".join(
         f"{gap['dimension']} (+{gap['available_gain']})" for gap in open_lanes[:3]
     ) or "none"
@@ -521,7 +527,7 @@ choose one improvement only for this session.
 prefer the highest-leverage capability-building improvement if the build is already healthy.
 do not spend a healthy session on syntax cleanup, error handling, or input validation alone unless that issue is actively blocking another capability.
 tie the chosen improvement to one benchmark ability a real coding agent needs: navigation, multi-file editing, test execution, git workflow, repo context, or recovery from failures.
-the verify command is now python scripts/capability_score.py which scores capability dimensions: git (weight 4), recovery (3), edit (3), exec (2), nav (2), search (2), harness (1). each dimension is capped at 3 tests. the git dimension currently scores 0 — any session that adds a passing git-workflow test earns the single largest score gain available.
+the verify command is now python scripts/capability_score.py which scores capability dimensions: git (weight 4), recovery (3), edit (3), exec (2), nav (2), search (2), harness (1). each dimension is capped at 3 tests. use the live capability snapshot below instead of assuming one lane is always best.
 if the same benchmark ability has stalled for 2 sessions without a kept metric gain, do not spend this session retrying the same direct fix. either fix the blocker that caused the failed verification or pivot to the next highest-gap benchmark ability.
 {stall_signal or "recent stall signal: none. still avoid repeating a failed direct approach without new evidence."}
 {gap_guidance}
@@ -550,7 +556,7 @@ rules:
 - scope should name repo files or directories, not globs
 - prefer a task that compounds future throughput, not another isolated cleanup
 - if recent sessions already failed on one capability, name that stall in benchmark_gap and explain the pivot or blocker fix in rationale
-- if git is the stalled lane and navigation or search still have open counted tests, prefer that safer non-git lane before drafting another git test
+- if git work is chosen, only test it inside temporary repos or other isolated sandboxes. never mutate the project repo just to exercise git behavior
 """
     run_ginji_prompt(plan_prompt, plan_path, timeout=timeout, model=model, ginji_bin=ginji_bin)
     if not validate_session_plan(plan_path):

@@ -74,7 +74,9 @@ def test_evolution_rules_prioritize_capability_growth():
     assert "if the same benchmark gap fails to produce a kept gain for 2 sessions" in evolve_skill
     assert "if the same benchmark ability has stalled for 2 sessions without a kept metric gain" in evolve_runtime
     assert "prefer a safer open non-git lane" in evolve_skill
-    assert "if git is the stalled lane and navigation or search still have open counted tests" in evolve_runtime
+    assert "use the live gap snapshot" in evolve_skill
+    assert "only test it inside temporary repos or other isolated sandboxes" in evolve_runtime
+    assert "never mutate the project repo" in evolve_skill
 
 
 def test_journal_prompt_requires_specifics():

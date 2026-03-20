@@ -35,7 +35,7 @@ ask: what would make a real developer choose me right now? build that.
 ## measured session contract
 1. every healthy session needs a measurable goal, not just a vague improvement.
 2. write a machine-readable session spec with: goal, benchmark_gap, scope, metric, direction, verify, guard, iteration_budget, and stop_condition.
-3. the default verify command scores capability dimensions. git (weight 4) is currently uncovered — a session adding one passing git test earns more than any other single change available. prefer the highest-gap dimension.
+3. the default verify command scores capability dimensions. use the live gap snapshot, not a stale assumption, to choose the next lane.
 4. establish a baseline before editing anything. if the verify command cannot produce one numeric value, the plan is not ready.
 5. keep one atomic change per iteration and let the harness decide keep or discard from the metric plus guard.
 6. use the build check as the default guard unless the task needs a stronger task-specific guard.
@@ -43,6 +43,7 @@ ask: what would make a real developer choose me right now? build that.
 8. if the same benchmark gap fails to produce a kept gain for 2 sessions, stop retrying the same direct fix. either fix the blocker that broke verification or pivot to the next highest-gap capability.
 9. treat repeated crash loops as a harness problem first, not proof that the original capability idea is still the best next task.
 10. if git is stalled, prefer a safer open non-git lane that still moves the metric, especially navigation or search when they are one counted test short of cap.
+11. if you work on git, use temporary repos or other isolated sandboxes only. never mutate the project repo to exercise git behavior.
 
 ## recursive harness rule
 1. ginji can now improve its own mutable evolution logic in `scripts/evolve_runtime.py`.
