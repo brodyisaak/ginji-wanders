@@ -120,3 +120,18 @@ def test_kernel_runtime_split_is_explicit():
     assert "kernel: final build guard before publish" in evolve_script
     assert "restore_missing_journal_history" in evolve_script
     assert "run_ginji_prompt" in evolve_runtime
+
+
+def test_evolution_retry_policy_is_fast_and_selective():
+    workflow = (ROOT / ".github" / "workflows" / "evolve.yml").read_text(encoding="utf-8", errors="replace")
+    evolve_script = (ROOT / "scripts" / "evolve.sh").read_text(encoding="utf-8", errors="replace")
+
+    assert "retry after 5min for transient runtime failures" in workflow
+    assert "steps.attempt1.outputs.retryable == 'true'" in workflow
+    assert "sleep 300" in workflow
+    assert "sleep 900" not in workflow
+    assert "sleep 2700" not in workflow
+    assert ".evolve_failure_kind" in workflow
+    assert 'DEFAULT_VERIFY="python scripts/capability_score.py"' in evolve_script
+    assert 'mark_failure "deterministic-build"' in evolve_script
+    assert 'mark_failure "transient-runtime"' in evolve_script

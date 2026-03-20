@@ -7,13 +7,22 @@ MODEL="gpt-4o-mini"
 BIRTH_DATE="2026-03-07"
 GINJI_BIN="python src/ginji.py"
 BUILD_CHECK='python -m py_compile src/ginji.py && python -m pytest tests/ -q'
-DEFAULT_VERIFY="python -m pytest tests/ --collect-only -q 2>/dev/null | tail -n 1 | awk '{print \$1}'"
+DEFAULT_VERIFY="python scripts/capability_score.py"
 TIMEOUT="${TIMEOUT:-1200}"
 IMPL_TIMEOUT="${IMPL_TIMEOUT:-900}"
 RESULTS_LOG="EVOLUTION_RESULTS.tsv"
+FAILURE_KIND_FILE=".evolve_failure_kind"
 
 BOT_NAME="ginji-wanders[bot]"
 BOT_EMAIL="ginji-wanders[bot]@users.noreply.github.com"
+
+mark_failure() {
+  printf '%s\n' "$1" > "$FAILURE_KIND_FILE"
+}
+
+clear_failure_marker() {
+  rm -f "$FAILURE_KIND_FILE"
+}
 
 latest_journal_day() {
   python - <<'PY'
@@ -89,9 +98,11 @@ PY
 }
 
 echo "starting ${PROJECT_NAME} evolution run"
+clear_failure_marker
 
 if [[ -z "${OPENAI_API_KEY:-}" ]]; then
   echo "missing OPENAI_API_KEY"
+  mark_failure "config"
   exit 1
 fi
 
@@ -122,7 +133,10 @@ if [[ "$last_post_pst" == "$today_pst" ]]; then
 fi
 
 echo "kernel: preflight build check"
-bash -lc "$BUILD_CHECK"
+if ! bash -lc "$BUILD_CHECK"; then
+  mark_failure "deterministic-build"
+  exit 1
+fi
 
 journal_history_snapshot="$(mktemp)"
 if [[ -f JOURNAL.md ]]; then
@@ -138,7 +152,10 @@ export GINJI_TODAY_PST="$today_pst"
 export GINJI_JOURNAL_SNAPSHOT="$journal_history_snapshot"
 
 echo "kernel: handing control to mutable runtime"
-python scripts/evolve_runtime.py
+if ! python scripts/evolve_runtime.py; then
+  mark_failure "transient-runtime"
+  exit 1
+fi
 
 echo "kernel: restore journal history if needed"
 restore_missing_journal_history "$journal_history_snapshot"
@@ -149,7 +166,10 @@ if ! grep -q "^## day ${next_day} —" JOURNAL.md 2>/dev/null; then
 fi
 
 echo "kernel: final build guard before publish"
-bash -lc "$BUILD_CHECK"
+if ! bash -lc "$BUILD_CHECK"; then
+  mark_failure "deterministic-build"
+  exit 1
+fi
 
 echo "$(latest_journal_day)" > DAY_COUNT
 echo "$today_pst" > LAST_POST_DATE_PST
@@ -176,3 +196,4 @@ else
 fi
 
 echo "evolution run complete"
+clear_failure_marker
