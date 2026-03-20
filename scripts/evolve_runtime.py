@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import os
 import re
 import shutil
@@ -320,6 +321,71 @@ def recent_stall_signal(limit: int = 3) -> str:
     )
 
 
+def capability_snapshot() -> dict:
+    result = subprocess.run(
+        [sys.executable, "scripts/capability_score.py", "--details"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return {"score": "", "counts": {}, "gaps": []}
+    try:
+        payload = json.loads(result.stdout.strip())
+    except json.JSONDecodeError:
+        return {"score": "", "counts": {}, "gaps": []}
+    if not isinstance(payload, dict):
+        return {"score": "", "counts": {}, "gaps": []}
+    return payload
+
+
+def capability_gap_guidance(snapshot: dict, stalled_ability: str) -> str:
+    gaps = snapshot.get("gaps") or []
+    if not gaps:
+        return "current capability snapshot unavailable. if git stays blocked, choose the safest non-git capability with measurable upside."
+
+    stalled_dimension = ""
+    lowered = stalled_ability.lower()
+    if "git" in lowered:
+        stalled_dimension = "git"
+    elif "navigation" in lowered:
+        stalled_dimension = "nav"
+    elif "search" in lowered:
+        stalled_dimension = "search"
+    elif "recovery" in lowered:
+        stalled_dimension = "recovery"
+    elif "edit" in lowered or "multi-file" in lowered:
+        stalled_dimension = "edit"
+    elif "test" in lowered or "exec" in lowered:
+        stalled_dimension = "exec"
+
+    open_lanes = [gap for gap in gaps if gap.get("remaining", 0) > 0]
+    best_open = ", ".join(
+        f"{gap['dimension']} (+{gap['available_gain']})" for gap in open_lanes[:3]
+    ) or "none"
+
+    safe_non_git = [
+        gap for gap in open_lanes
+        if gap.get("dimension") != "git" and gap.get("available_gain", 0) > 0
+    ]
+    if stalled_dimension == "git" and safe_non_git:
+        preferred = ", ".join(
+            f"{gap['dimension']} (+{gap['available_gain']})" for gap in safe_non_git[:2]
+        )
+        return (
+            f"current capability snapshot: score {snapshot.get('score', 'n/a')}. "
+            f"best open lanes are {best_open}. "
+            f"because git is the stalled dimension, prefer the safer non-git lane first: {preferred}. "
+            "only return to git after you either fix the git-specific blocker or exhaust the safer measurable lane."
+        )
+
+    return (
+        f"current capability snapshot: score {snapshot.get('score', 'n/a')}. "
+        f"best open lanes are {best_open}. "
+        "prefer the highest-yield open lane that is not already stalled."
+    )
+
+
 def process_issue_responses(repo: str) -> None:
     issue_path = ROOT / "ISSUE_RESPONSE.md"
     if not issue_path.exists() or not have_gh():
@@ -428,6 +494,8 @@ def main() -> int:
     plan_path = ROOT / "SESSION_PLAN.md"
     journal_snapshot = Path(env("GINJI_JOURNAL_SNAPSHOT", str(ROOT / ".journal_snapshot.tmp")))
     stall_signal = recent_stall_signal()
+    snapshot = capability_snapshot()
+    gap_guidance = capability_gap_guidance(snapshot, stall_signal)
 
     ensure_results_log(results_path)
     fetch_issue_digests(repo, next_day)
@@ -456,6 +524,7 @@ tie the chosen improvement to one benchmark ability a real coding agent needs: n
 the verify command is now python scripts/capability_score.py which scores capability dimensions: git (weight 4), recovery (3), edit (3), exec (2), nav (2), search (2), harness (1). each dimension is capped at 3 tests. the git dimension currently scores 0 — any session that adds a passing git-workflow test earns the single largest score gain available.
 if the same benchmark ability has stalled for 2 sessions without a kept metric gain, do not spend this session retrying the same direct fix. either fix the blocker that caused the failed verification or pivot to the next highest-gap benchmark ability.
 {stall_signal or "recent stall signal: none. still avoid repeating a failed direct approach without new evidence."}
+{gap_guidance}
 write this exact machine-readable header first, one field per line, with single-line values:
 goal: ...
 benchmark_gap: ...
@@ -481,6 +550,7 @@ rules:
 - scope should name repo files or directories, not globs
 - prefer a task that compounds future throughput, not another isolated cleanup
 - if recent sessions already failed on one capability, name that stall in benchmark_gap and explain the pivot or blocker fix in rationale
+- if git is the stalled lane and navigation or search still have open counted tests, prefer that safer non-git lane before drafting another git test
 """
     run_ginji_prompt(plan_prompt, plan_path, timeout=timeout, model=model, ginji_bin=ginji_bin)
     if not validate_session_plan(plan_path):

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import argparse
+import json
 import re
 import subprocess
 import sys
@@ -17,9 +19,11 @@ TEST_TO_DIMENSION = {
     "test_edit_file_old_str_not_found": "recovery",
     "test_edit_file_replaces_first_occurrence_only": "edit",
     "test_list_files_success": "nav",
+    "test_list_files_nested_paths": "nav",
     "test_list_files_not_found": "recovery",
     "test_search_files_matches": "search",
     "test_search_files_no_matches": "search",
+    "test_search_files_regex_matches_multiple_files": "search",
     "test_search_files_directory_not_found": "recovery",
 }
 
@@ -46,7 +50,51 @@ def dimension_for_test(node_id):
     return None
 
 
-def main():
+def passed_test_nodes(pytest_output):
+    nodes = []
+    for line in pytest_output.splitlines():
+        match = PASSED_LINE.search(line.strip())
+        if match:
+            nodes.append(match.group(1))
+    return nodes
+
+
+def dimension_counts(passed_names):
+    counts = {name: 0 for name in WEIGHTS}
+    for node_id in passed_names:
+        dimension = dimension_for_test(node_id)
+        if dimension is not None:
+            counts[dimension] += 1
+    return counts
+
+
+def score_from_counts(counts):
+    score = 0
+    for dimension, weight in WEIGHTS.items():
+        score += weight * min(counts[dimension], CAP)
+    return score
+
+
+def gap_report(counts):
+    gaps = []
+    for dimension, weight in WEIGHTS.items():
+        counted = min(counts[dimension], CAP)
+        remaining = max(CAP - counted, 0)
+        gaps.append(
+            {
+                "dimension": dimension,
+                "count": counts[dimension],
+                "counted": counted,
+                "remaining": remaining,
+                "weight": weight,
+                "available_gain": remaining * weight,
+            }
+        )
+    gaps.sort(key=lambda item: (item["available_gain"], item["weight"], item["dimension"]), reverse=True)
+    return gaps
+
+
+def run_pytest(args):
     result = subprocess.run(
         [sys.executable, "-m", "pytest", "tests/", "-v", "--tb=no", "-q"],
         capture_output=True,
@@ -55,14 +103,9 @@ def main():
     if result.returncode != 0:
         message = (result.stderr or "").strip() or (result.stdout or "").strip() or "error: pytest failed to run"
         print(message, file=sys.stderr)
-        return 1
+        return 1, []
 
-    passed_names = []
-    for line in result.stdout.splitlines():
-        match = PASSED_LINE.search(line.strip())
-        if not match:
-            continue
-        passed_names.append(match.group(1))
+    passed_names = passed_test_nodes(result.stdout)
 
     if not passed_names:
         fallback = subprocess.run(
@@ -73,22 +116,32 @@ def main():
         if fallback.returncode != 0:
             message = (fallback.stderr or "").strip() or (fallback.stdout or "").strip() or "error: pytest failed to run"
             print(message, file=sys.stderr)
-            return 1
-        for line in fallback.stdout.splitlines():
-            match = PASSED_LINE.search(line.strip())
-            if not match:
-                continue
-            passed_names.append(match.group(1))
+            return 1, []
+        passed_names = passed_test_nodes(fallback.stdout)
 
-    counts = {name: 0 for name in WEIGHTS}
-    for node_id in passed_names:
-        dimension = dimension_for_test(node_id)
-        if dimension is not None:
-            counts[dimension] += 1
+    return 0, passed_names
 
-    score = 0
-    for dimension, weight in WEIGHTS.items():
-        score += weight * min(counts[dimension], CAP)
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--details", action="store_true")
+    args = parser.parse_args()
+
+    code, passed_names = run_pytest(args)
+    if code != 0:
+        return code
+
+    counts = dimension_counts(passed_names)
+    score = score_from_counts(counts)
+
+    if args.details:
+        payload = {
+            "score": score,
+            "counts": counts,
+            "gaps": gap_report(counts),
+        }
+        print(json.dumps(payload, separators=(",", ":")))
+        return 0
 
     print(score)
     return 0

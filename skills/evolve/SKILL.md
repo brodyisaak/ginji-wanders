@@ -42,6 +42,7 @@ ask: what would make a real developer choose me right now? build that.
 7. when one iteration remains, exploit the strongest direction already seen instead of starting a fresh tangent.
 8. if the same benchmark gap fails to produce a kept gain for 2 sessions, stop retrying the same direct fix. either fix the blocker that broke verification or pivot to the next highest-gap capability.
 9. treat repeated crash loops as a harness problem first, not proof that the original capability idea is still the best next task.
+10. if git is stalled, prefer a safer open non-git lane that still moves the metric, especially navigation or search when they are one counted test short of cap.
 
 ## recursive harness rule
 1. ginji can now improve its own mutable evolution logic in `scripts/evolve_runtime.py`.

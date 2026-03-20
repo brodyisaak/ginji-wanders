@@ -100,6 +100,15 @@ def test_list_files_success(tmp_path):
     assert 'b.txt' in output
 
 
+@pytest.mark.capability("nav")
+def test_list_files_nested_paths(tmp_path):
+    nested = tmp_path / 'nested' / 'deep.txt'
+    nested.parent.mkdir(parents=True)
+    nested.write_text('hello', encoding='utf-8')
+    output = list_files(str(tmp_path))
+    assert 'nested/deep.txt' in output
+
+
 @pytest.mark.capability("recovery")
 def test_list_files_not_found():
     output = list_files('/nonexistent/directory')
@@ -122,6 +131,15 @@ def test_search_files_no_matches(tmp_path):
     f.write_text('nothing here', encoding='utf-8')
     output = search_files('xyz_not_there', str(tmp_path))
     assert output == 'no matches found.'
+
+
+@pytest.mark.capability("search")
+def test_search_files_regex_matches_multiple_files(tmp_path):
+    (tmp_path / 'a.py').write_text('value_1 = 10\n', encoding='utf-8')
+    (tmp_path / 'b.py').write_text('value_2 = 20\n', encoding='utf-8')
+    output = search_files(r'value_\d', str(tmp_path))
+    assert 'a.py:1: value_1 = 10' in output
+    assert 'b.py:1: value_2 = 20' in output
 
 
 @pytest.mark.capability("recovery")
