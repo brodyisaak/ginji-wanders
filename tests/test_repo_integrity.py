@@ -84,6 +84,8 @@ def test_journal_prompt_requires_specifics():
 
     assert "mention the exact test or build command you ran" in evolve_runtime
     assert "name the concrete bug, capability, or edge case you touched" in evolve_runtime
+    assert ".tmp_session_summary.md" in evolve_runtime
+    assert "ground the entry in .tmp_session_summary.md" in evolve_runtime
 
 
 def test_metric_loop_language_is_present():
@@ -100,6 +102,8 @@ def test_metric_loop_language_is_present():
     assert "iteration_budget:" in evolve_runtime
     assert "EVOLUTION_RESULTS.tsv" in evolve_runtime
     assert "baseline row" in evolve_runtime
+    assert "normalize_results_rows" in evolve_runtime
+    assert "write_session_summary" in evolve_runtime
     assert "bounded internal iteration loop" in readme
 
 

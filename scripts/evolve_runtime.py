@@ -15,6 +15,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS_HEADER = "timestamp\tday\titeration\tmetric\tdelta\tstatus\tdescription\n"
+RESULT_STATUSES = {"baseline", "keep", "discard", "crash", "partial"}
+ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
 DEFAULT_SCOPE = [
     "src/ginji.py",
     "tests",
@@ -61,9 +63,77 @@ def have_gh() -> bool:
     ).returncode == 0
 
 
+def strip_ansi(text: str) -> str:
+    return ANSI_ESCAPE_RE.sub("", text)
+
+
+def sanitize_inline_text(text: str) -> str:
+    return re.sub(r"\s+", " ", strip_ansi(text).strip())
+
+
+def canonicalize_result_description(text: str) -> str:
+    cleaned = sanitize_inline_text(text)
+    lowered = cleaned.lower()
+    if re.fullmatch(r"tool [a-z_]+", lowered):
+        return "implementation log was noisy; description unavailable"
+    if re.fullmatch(r"metric did not improve: tool [a-z_]+", lowered):
+        return "metric did not improve: implementation log was noisy"
+    return cleaned
+
+
+def parse_result_row(line: str) -> dict[str, str] | None:
+    parts = line.rstrip("\n").split("\t")
+    if len(parts) < 7:
+        return None
+    timestamp, day, iteration, metric, delta = parts[:5]
+    if not timestamp or not re.fullmatch(r"\d+", day) or not re.fullmatch(r"\d+", iteration):
+        return None
+    if parts[5] not in RESULT_STATUSES:
+        return None
+    return {
+        "timestamp": timestamp,
+        "day": day,
+        "iteration": iteration,
+        "metric": metric,
+        "delta": delta,
+        "status": parts[5],
+        "description": canonicalize_result_description("\t".join(parts[6:])),
+    }
+
+
+def serialize_result_row(row: dict[str, str]) -> str:
+    return "\t".join(
+        [
+            row["timestamp"],
+            row["day"],
+            row["iteration"],
+            row["metric"],
+            row["delta"],
+            row["status"],
+            canonicalize_result_description(row["description"]),
+        ]
+    )
+
+
+def normalize_results_rows(text: str) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for line in text.splitlines():
+        if not line.strip() or line.strip() == RESULTS_HEADER.strip():
+            continue
+        row = parse_result_row(line)
+        if row is not None:
+            rows.append(row)
+    rows.sort(key=lambda row: (int(row["day"]), int(row["iteration"]), row["timestamp"]))
+    return rows
+
+
 def ensure_results_log(results_path: Path) -> None:
-    if not results_path.exists() or results_path.read_text(encoding="utf-8", errors="replace").splitlines()[:1] != [RESULTS_HEADER.strip()]:
+    if not results_path.exists():
         write_text(results_path, RESULTS_HEADER)
+        return
+    rows = normalize_results_rows(results_path.read_text(encoding="utf-8", errors="replace"))
+    normalized = RESULTS_HEADER + "".join(serialize_result_row(row) + "\n" for row in rows)
+    write_text(results_path, normalized)
 
 
 SESSION_FIELD_RE = re.compile(r"^([a-z_]+):\s*(.*)$")
@@ -418,9 +488,80 @@ def process_issue_responses(repo: str) -> None:
 
 
 def log_metric_result(results_path: Path, day_num: int, iteration: int, metric: str, delta: str, status: str, description: str) -> None:
-    cleaned = re.sub(r"\s+", " ", description.strip())
+    cleaned = canonicalize_result_description(description)
     with results_path.open("a", encoding="utf-8") as handle:
         handle.write(f"{datetime.now().astimezone().isoformat()}\t{day_num}\t{iteration}\t{metric}\t{delta}\t{status}\t{cleaned}\n")
+
+
+def session_rows_for_day(results_path: Path, day_num: int) -> list[dict[str, str]]:
+    rows = normalize_results_rows(read_text(results_path))
+    return [row for row in rows if row["day"] == str(day_num)]
+
+
+def extract_iteration_description(log_text: str, iteration: int, scope_text: str) -> str:
+    skip_prefixes = ("tool ", "thinking", "[stderr]", "assistant:", "user:")
+    for raw_line in log_text.splitlines():
+        line = sanitize_inline_text(raw_line)
+        lowered = line.lower()
+        if not line:
+            continue
+        if line in {"```", "---"}:
+            continue
+        if any(lowered.startswith(prefix) for prefix in skip_prefixes):
+            continue
+        if lowered in {"applied_patch", "done"}:
+            continue
+        return line
+    return f"iteration {iteration} change inside {scope_text}"
+
+
+def write_session_summary(
+    summary_path: Path,
+    *,
+    day_num: int,
+    plan_path: Path,
+    results_path: Path,
+    metric_name: str,
+    verify_command: str,
+    guard_command: str,
+    baseline_metric: str,
+    best_metric: str,
+    snapshot: dict,
+) -> None:
+    rows = session_rows_for_day(results_path, day_num)
+    outcome_rows = [row for row in rows if row["iteration"] != "0"]
+    kept = [row for row in outcome_rows if row["status"] == "keep"]
+    discarded = [row for row in outcome_rows if row["status"] == "discard"]
+    crashed = [row for row in outcome_rows if row["status"] == "crash"]
+    best_change = kept[-1]["description"] if kept else "no kept improvement"
+    summary_lines = [
+        f"day: {day_num}",
+        f"goal: {session_field(plan_path, 'goal')}",
+        f"benchmark_gap: {session_field(plan_path, 'benchmark_gap')}",
+        f"metric: {metric_name}",
+        f"verify: {verify_command}",
+        f"guard: {guard_command}",
+        f"baseline_metric: {baseline_metric}",
+        f"best_metric: {best_metric}",
+        f"kept_iterations: {len(kept)}",
+        f"discarded_iterations: {len(discarded)}",
+        f"crashed_iterations: {len(crashed)}",
+        f"best_change: {best_change}",
+        f"current_capability_score: {snapshot.get('score', '')}",
+        f"current_capability_counts: {json.dumps(snapshot.get('counts', {}), separators=(',', ':'))}",
+    ]
+    if outcome_rows:
+        summary_lines.extend(
+            [
+                "",
+                "iteration_log:",
+                *[
+                    f"- iteration {row['iteration']}: {row['status']} metric={row['metric']} delta={row['delta']} desc={row['description']}"
+                    for row in outcome_rows
+                ],
+            ]
+        )
+    write_text(summary_path, "\n".join(summary_lines).strip() + "\n")
 
 
 def measure_metric(command: str) -> str:
@@ -477,7 +618,13 @@ def run_ginji_prompt(prompt_text: str, output_path: Path, *, timeout: int, model
     try:
         command = f"cat {prompt_file} | {ginji_bin} --model '{model}' --skills skills"
         result = run_shell(command, timeout=timeout, check=False)
-        write_text(output_path, result.stdout)
+        combined = result.stdout or ""
+        stderr = result.stderr or ""
+        if stderr.strip():
+            if combined and not combined.endswith("\n"):
+                combined += "\n"
+            combined += "[stderr]\n" + stderr
+        write_text(output_path, combined)
         return result.returncode == 0
     except Exception:
         return False
@@ -627,8 +774,7 @@ requirements:
             shutil.rmtree(snapshot_dir, ignore_errors=True)
             continue
         status, delta = compare_metric(direction, best_metric, candidate_metric)
-        first_line = next((line.strip() for line in read_text(log_path).splitlines() if line.strip()), "")
-        description = first_line or f"iteration {iteration} change inside {scope_text}"
+        description = extract_iteration_description(read_text(log_path), iteration, scope_text)
         if status != "improved":
             restore_scope_state(snapshot_dir)
             log_metric_result(results_path, next_day, iteration, candidate_metric, delta, "discard", f"metric did not improve: {description}")
@@ -646,10 +792,25 @@ requirements:
         if "first kept improvement" in stop_condition:
             break
 
+    summary_path = ROOT / ".tmp_session_summary.md"
+    snapshot = capability_snapshot()
+    write_session_summary(
+        summary_path,
+        day_num=next_day,
+        plan_path=plan_path,
+        results_path=results_path,
+        metric_name=metric_name,
+        verify_command=verify_command,
+        guard_command=guard_command,
+        baseline_metric=baseline_metric,
+        best_metric=best_metric,
+        snapshot=snapshot,
+    )
+
     issue_prompt = "review SESSION_PLAN.md and your implementation logs. if you worked on any github issue, write ISSUE_RESPONSE.md exactly in the communicate skill format. if no issue work was done, do not create ISSUE_RESPONSE.md. keep lowercase and use ginji's small silver fox voice."
     run_ginji_prompt(issue_prompt, ROOT / ".tmp_issue_phase.log", timeout=impl_timeout, model=model, ginji_bin=ginji_bin)
 
-    journal_prompt = f"""read SESSION_PLAN.md and EVOLUTION_RESULTS.tsv.
+    journal_prompt = f"""read SESSION_PLAN.md, .tmp_session_summary.md, and EVOLUTION_RESULTS.tsv.
 write one journal entry to JOURNAL_ENTRY.md only.
 do not rewrite JOURNAL.md directly.
 format exactly:
@@ -657,6 +818,7 @@ format exactly:
 
 requirements:
 - 4 to 6 sentences in lowercase
+- ground the entry in .tmp_session_summary.md so it matches the measured session
 - describe the kept capability gain, not discarded attempts
 - mention at least one touched file path
 - mention the exact verify or build command you ran
@@ -681,7 +843,7 @@ requirements:
     restore_missing_journal_history(journal_snapshot)
     journal_entry.unlink(missing_ok=True)
 
-    learning_prompt = f"""read SESSION_PLAN.md and EVOLUTION_RESULTS.tsv.
+    learning_prompt = f"""read SESSION_PLAN.md, .tmp_session_summary.md, and EVOLUTION_RESULTS.tsv.
 write one learning entry to LEARNINGS_ENTRY.md only.
 do not rewrite LEARNINGS.md directly.
 format exactly:
@@ -692,6 +854,7 @@ format exactly:
 rules:
 - focus on the measured loop, not generic motivation
 - tie the learning to a concrete command, file, guard, or discarded attempt
+- use .tmp_session_summary.md as the primary source of truth for the current session outcome
 - keep it lowercase
 """
     learnings_entry = ROOT / "LEARNINGS_ENTRY.md"
@@ -701,6 +864,7 @@ rules:
     else:
         append_fallback_learning(next_day)
     learnings_entry.unlink(missing_ok=True)
+    summary_path.unlink(missing_ok=True)
 
     process_issue_responses(repo)
     run_shell("python scripts/build_site.py")
