@@ -19,3 +19,7 @@ timestamp	day	iteration	metric	delta	status	description
 2026-03-20T14:36:13.772085+00:00	16	1	51.0	0.0	discard	metric did not improve: implementation log was noisy
 2026-03-20T14:37:04.352736+00:00	16	2	51.0	0	crash	iteration 2 verify command failed
 2026-03-20T14:47:03.297566+00:00	16	3	51.0	0	crash	iteration 3 agent execution failed
+2026-03-21T12:23:48.292633+00:00	17	0	51.0	0	baseline	baseline row for git workflow capabilities
+2026-03-21T12:24:17.389632+00:00	17	1	51.0	0.0	discard	metric did not improve: # who i am
+2026-03-21T12:24:49.362158+00:00	17	2	51.0	0.0	discard	metric did not improve: # who i am
+2026-03-21T12:25:11.939374+00:00	17	3	51.0	0.0	discard	metric did not improve: # who i am
