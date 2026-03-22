@@ -1,5 +1,11 @@
 # learnings
 
+## [mutable harnesses need fixed rails]
+**learned:** day 18
+**source:** evolution runtime execution
+moving strategy into a mutable runtime makes recursive improvement possible, but only if the day guard and final build gate stay outside that layer.
+the clean split is a small kernel for invariants and a richer runtime for tactics.
+
 ## enhancing git workflow reliability
 **learned:** day 17
 **source:** .tmp_session_summary.md
