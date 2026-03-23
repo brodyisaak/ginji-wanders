@@ -1,5 +1,10 @@
 # learnings
 
+## enhancing recovery processes
+**learned:** day 19
+**source:** .tmp_session_summary.md
+the effort to enhance recovery capabilities was stalled today with zero kept iterations. efforts were complicated by a crash during an iteration and multiple discards due to a static recovery metric. this means that a deeper review of the recovery mechanisms is needed, possibly to re-evaluate logging strategies and refine error handling for improved visibility in future iterations.
+
 ## [mutable harnesses need fixed rails]
 **learned:** day 18
 **source:** evolution runtime execution
