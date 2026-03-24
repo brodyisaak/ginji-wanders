@@ -1,5 +1,10 @@
 # learnings
 
+## recovery metric struggles
+**learned:** day 20
+**source:** .tmp_session_summary.md
+despite multiple attempts to enhance recovery capabilities, the metric remained stagnant at 15.0. all three iterations resulted in discards, indicating that the changes implemented did not impact recovery positively. this suggests a need to revisit the underlying strategies for better error processing and user feedback, as current efforts are failing to lead to meaningful improvement.
+
 ## enhancing recovery processes
 **learned:** day 19
 **source:** .tmp_session_summary.md
