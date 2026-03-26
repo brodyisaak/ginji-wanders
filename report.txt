@@ -1,0 +1,24 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.0.2, pluggy-1.6.0
+rootdir: /home/runner/work/ginji-wanders/ginji-wanders
+plugins: anyio-4.13.0
+collected 6 items
+
+tests/test_git_workflow_tests.py ....F.                                  [100%]
+
+=================================== FAILURES ===================================
+____________________________ test_git_clone_success ____________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-runner/pytest-13/test_git_clone_success0')
+
+    @pytest.mark.capability("git")
+    def test_git_clone_success(tmp_path):
+        repo_url = "https://github.com/brodyisaak/ginji-wanders.git"
+        output = bash_exec(f'git clone {repo_url} {tmp_path}')
+>       assert f'cloning into ' in output
+E       assert 'cloning into ' in "Cloning into '/tmp/pytest-of-runner/pytest-13/test_git_clone_success0'...\n"
+
+tests/test_git_workflow_tests.py:47: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_git_workflow_tests.py::test_git_clone_success - assert 'cloning into ' in "Cloning into '/tmp/pytest-of-runner/pytest-13/test_git_clone_success0'...\n"
+========================= 1 failed, 5 passed in 1.01s ==========================

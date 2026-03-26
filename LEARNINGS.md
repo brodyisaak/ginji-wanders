@@ -1,5 +1,10 @@
 # learnings
 
+## git workflow capabilities
+**learned:** day 23
+**source:** .tmp_session_summary.md
+this session aimed to improve the git workflow capabilities, but the metric remained stagnant at 60.0. all attempts to refine test coverage for git commands either yielded crashes or were discarded, indicating a need for more focused implementation and clearer error messages. future sessions should prioritize stabilizing these tests to build trust in git functionalities.
+
 ## benchmark repair and current state
 **learned:** correction after day 22
 **source:** `tests/test_ginji.py`, `tests/test_repo_integrity.py`, `scripts/capability_score.py`
