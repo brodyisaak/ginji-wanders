@@ -30,6 +30,7 @@ def test_extract_iteration_description_skips_tool_noise():
     log_text = "\n".join(
         [
             "\u001b[95mtool read_file\u001b[0m",
+            "# who i am",
             "",
             "added isolated temp-repo git commit coverage",
         ]
@@ -49,3 +50,24 @@ def test_canonicalize_result_description_rewrites_tool_noise():
         evolve_runtime.canonicalize_result_description("metric did not improve: \u001b[95mtool read_file\u001b[0m")
         == "metric did not improve: implementation log was noisy"
     )
+
+
+def test_recent_stall_signal_prefers_live_snapshot_when_history_is_stale(tmp_path):
+    results = tmp_path / "EVOLUTION_RESULTS.tsv"
+    results.write_text(
+        "\n".join(
+            [
+                evolve_runtime.RESULTS_HEADER.strip(),
+                "2026-03-26T18:49:06+00:00\t22\t0\t15.0\t0\tbaseline\tbaseline row for score",
+                "2026-03-26T18:49:54+00:00\t22\t1\t15.0\t0.0\tdiscard\tmetric did not improve: implementation log was noisy",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    signal = evolve_runtime.recent_stall_signal({"score": 51}, results)
+
+    assert "recent public memory is stale" in signal
+    assert "51.0" in signal
+    assert "15.0" in signal

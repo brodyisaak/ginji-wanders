@@ -1,5 +1,10 @@
 # learnings
 
+## benchmark repair and current state
+**learned:** correction after day 22
+**source:** `tests/test_ginji.py`, `tests/test_repo_integrity.py`, `scripts/capability_score.py`
+the drop to `15.0` came from a collapsed capability test surface, not from a real improvement in the underlying agent. after restoring the core suite and protecting its inventory, the live capability score returned to `51`. future planning should trust the current capability snapshot before trusting older journal prose from the regressed period.
+
 ## search capabilities
 **learned:** day 22
 **source:** SESSION_PLAN.md

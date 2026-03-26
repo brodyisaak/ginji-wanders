@@ -17,6 +17,10 @@ ROOT = Path(__file__).resolve().parents[1]
 RESULTS_HEADER = "timestamp\tday\titeration\tmetric\tdelta\tstatus\tdescription\n"
 RESULT_STATUSES = {"baseline", "keep", "discard", "crash", "partial"}
 ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+LOW_SIGNAL_LOG_LINE_RE = re.compile(
+    r"^(?:#+\s+.*|[-*]\s+.*|\d+\.\s+.*|who i am|what i am doing|here is .*|session plan|rationale|tasks)$",
+    re.I,
+)
 DEFAULT_SCOPE = [
     "src/ginji.py",
     "tests",
@@ -125,6 +129,13 @@ def normalize_results_rows(text: str) -> list[dict[str, str]]:
             rows.append(row)
     rows.sort(key=lambda row: (int(row["day"]), int(row["iteration"]), row["timestamp"]))
     return rows
+
+
+def parse_float_metric(value: str) -> float | None:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def ensure_results_log(results_path: Path) -> None:
@@ -330,6 +341,13 @@ def latest_journal_day() -> int:
     return int(match.group(1)) if match else 0
 
 
+def latest_baseline_metric(results_path: Path) -> float | None:
+    rows = normalize_results_rows(read_text(results_path))
+    baselines = [parse_float_metric(row["metric"]) for row in rows if row["iteration"] == "0"]
+    baselines = [value for value in baselines if value is not None]
+    return baselines[-1] if baselines else None
+
+
 JOURNAL_ENTRY_RE = re.compile(r"^## day (\d+) — (.+?)(?:\n\n|\n)(.*?)(?=^## day \d+ —|\Z)", re.M | re.S)
 
 
@@ -357,7 +375,16 @@ def classify_benchmark_ability(text: str) -> str:
     return ""
 
 
-def recent_stall_signal(limit: int = 3) -> str:
+def recent_stall_signal(snapshot: dict, results_path: Path, limit: int = 3) -> str:
+    current_score = parse_float_metric(snapshot.get("score"))
+    recorded_baseline = latest_baseline_metric(results_path)
+    if current_score is not None and recorded_baseline is not None and abs(current_score - recorded_baseline) >= 5:
+        return (
+            f"recent public memory is stale: the live capability snapshot is {current_score:.1f}, "
+            f"but the latest recorded session baseline is {recorded_baseline:.1f}. "
+            "treat the live snapshot as the current truth, treat the lower baseline as historical regression context, "
+            "and avoid planning as if the repo is still stuck on that older score."
+        )
     stall_terms = (
         "no improvement",
         "stagnant",
@@ -511,6 +538,8 @@ def extract_iteration_description(log_text: str, iteration: int, scope_text: str
             continue
         if lowered in {"applied_patch", "done"}:
             continue
+        if LOW_SIGNAL_LOG_LINE_RE.fullmatch(lowered):
+            continue
         return line
     return f"iteration {iteration} change inside {scope_text}"
 
@@ -646,8 +675,8 @@ def main() -> int:
     results_path = ROOT / env("RESULTS_LOG", "EVOLUTION_RESULTS.tsv")
     plan_path = ROOT / "SESSION_PLAN.md"
     journal_snapshot = Path(env("GINJI_JOURNAL_SNAPSHOT", str(ROOT / ".journal_snapshot.tmp")))
-    stall_signal = recent_stall_signal()
     snapshot = capability_snapshot()
+    stall_signal = recent_stall_signal(snapshot, results_path)
     gap_guidance = capability_gap_guidance(snapshot, stall_signal)
 
     ensure_results_log(results_path)
@@ -674,7 +703,7 @@ choose one improvement only for this session.
 prefer the highest-leverage capability-building improvement if the build is already healthy.
 do not spend a healthy session on syntax cleanup, error handling, or input validation alone unless that issue is actively blocking another capability.
 tie the chosen improvement to one benchmark ability a real coding agent needs: navigation, multi-file editing, test execution, git workflow, repo context, or recovery from failures.
-the verify command is now python scripts/capability_score.py which scores capability dimensions: git (weight 4), recovery (3), edit (3), exec (2), nav (2), search (2), harness (1). each dimension is capped at 3 tests. use the live capability snapshot below instead of assuming one lane is always best.
+the verify command is now python scripts/capability_score.py which scores capability dimensions plus completeness bonuses: git (weight 4), recovery (3), edit (3), exec (2), nav (2), search (2), harness (1). passing the full required suite for a dimension adds a small bonus on top of the capped count, so the metric rewards complete, stable capability surfaces instead of just partial test inventory. use the live capability snapshot below instead of assuming one lane is always best.
 if the same benchmark ability has stalled for 2 sessions without a kept metric gain, do not spend this session retrying the same direct fix. either fix the blocker that caused the failed verification or pivot to the next highest-gap benchmark ability.
 {stall_signal or "recent stall signal: none. still avoid repeating a failed direct approach without new evidence."}
 {gap_guidance}

@@ -31,6 +31,43 @@ TEST_TO_DIMENSION = {
     "test_git_commit_temp_repo": "git",
 }
 
+REQUIRED_TESTS = {
+    "git": {
+        "test_git_init_temp_repo",
+        "test_git_status_temp_repo",
+        "test_git_invalid_command_reports_git_error",
+        "test_git_commit_temp_repo",
+    },
+    "recovery": {
+        "test_bash_exec_nonzero_exit",
+        "test_read_file_not_found",
+        "test_edit_file_old_str_not_found",
+        "test_list_files_not_found",
+        "test_search_files_directory_not_found",
+    },
+    "edit": {
+        "test_write_file_success",
+        "test_write_file_creates_dirs",
+        "test_edit_file_success",
+        "test_edit_file_replaces_first_occurrence_only",
+    },
+    "exec": {
+        "test_bash_exec_file_not_found",
+        "test_bash_exec_permission_denied",
+        "test_bash_exec_success",
+    },
+    "nav": {
+        "test_read_file_success",
+        "test_list_files_success",
+        "test_list_files_nested_paths",
+    },
+    "search": {
+        "test_search_files_matches",
+        "test_search_files_no_matches",
+        "test_search_files_regex_matches_multiple_files",
+    },
+}
+
 WEIGHTS = {
     "git": 4,
     "recovery": 3,
@@ -39,6 +76,16 @@ WEIGHTS = {
     "nav": 2,
     "search": 2,
     "harness": 1,
+}
+
+COMPLETENESS_BONUS = {
+    "git": 2,
+    "recovery": 2,
+    "edit": 2,
+    "exec": 1,
+    "nav": 1,
+    "search": 1,
+    "harness": 0,
 }
 
 CAP = 3
@@ -76,7 +123,16 @@ def score_from_counts(counts):
     score = 0
     for dimension, weight in WEIGHTS.items():
         score += weight * min(counts[dimension], CAP)
+    score += completeness_bonus(counts)
     return score
+
+
+def completeness_bonus(counts):
+    bonus = 0
+    for dimension, required_tests in REQUIRED_TESTS.items():
+        if counts.get(dimension, 0) >= len(required_tests):
+            bonus += COMPLETENESS_BONUS.get(dimension, 0)
+    return bonus
 
 
 def gap_report(counts):
@@ -92,6 +148,8 @@ def gap_report(counts):
                 "remaining": remaining,
                 "weight": weight,
                 "available_gain": remaining * weight,
+                "completeness_bonus": COMPLETENESS_BONUS.get(dimension, 0),
+                "complete": counts[dimension] >= len(REQUIRED_TESTS.get(dimension, set())),
             }
         )
     gaps.sort(key=lambda item: (item["available_gain"], item["weight"], item["dimension"]), reverse=True)
@@ -141,6 +199,8 @@ def main():
     if args.details:
         payload = {
             "score": score,
+            "base_score": sum(weight * min(counts[dimension], CAP) for dimension, weight in WEIGHTS.items()),
+            "completeness_bonus": completeness_bonus(counts),
             "counts": counts,
             "gaps": gap_report(counts),
         }

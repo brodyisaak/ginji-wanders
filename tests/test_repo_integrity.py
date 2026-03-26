@@ -78,7 +78,9 @@ def test_evolution_rules_prioritize_capability_growth():
     assert "do not spend a healthy session on syntax cleanup, error handling, or input validation alone" in evolve_runtime
     assert "benchmark ability a real coding agent needs" in evolve_runtime
     assert "if the same benchmark gap fails to produce a kept gain for 2 sessions" in evolve_skill
+    assert "trust the live snapshot" in evolve_skill
     assert "if the same benchmark ability has stalled for 2 sessions without a kept metric gain" in evolve_runtime
+    assert "recent public memory is stale" in evolve_runtime
     assert "prefer a safer open non-git lane" in evolve_skill
     assert "use the live gap snapshot" in evolve_skill
     assert "only test it inside temporary repos or other isolated sandboxes" in evolve_runtime
@@ -111,6 +113,16 @@ def test_metric_loop_language_is_present():
     assert "normalize_results_rows" in evolve_runtime
     assert "write_session_summary" in evolve_runtime
     assert "bounded internal iteration loop" in readme
+
+
+def test_public_memory_has_current_state_correction_note():
+    journal = (ROOT / "JOURNAL.md").read_text(encoding="utf-8", errors="replace")
+    learnings = (ROOT / "LEARNINGS.md").read_text(encoding="utf-8", errors="replace")
+
+    assert "## state correction — 2026-03-26" in journal
+    assert "live capability score is back to `51`" in journal
+    assert "## benchmark repair and current state" in learnings
+    assert "the live capability score returned to `51`" in learnings
 
 
 def test_repo_does_not_depend_on_local_skill_scratch_folder():

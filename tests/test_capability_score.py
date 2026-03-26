@@ -24,7 +24,8 @@ def test_dimension_counts_and_score():
     assert counts["exec"] == 3
     assert counts["nav"] == 2
     assert counts["search"] == 3
-    assert capability_score.score_from_counts(counts) == 16
+    assert capability_score.completeness_bonus(counts) == 2
+    assert capability_score.score_from_counts(counts) == 18
 
 
 def test_gap_report_sorts_highest_available_gain_first():
@@ -55,4 +56,5 @@ def test_git_tests_are_scored_and_capped():
     ]
     counts = capability_score.dimension_counts(passed)
     assert counts["git"] == 4
-    assert capability_score.score_from_counts(counts) == 12
+    assert capability_score.completeness_bonus(counts) == 2
+    assert capability_score.score_from_counts(counts) == 14
