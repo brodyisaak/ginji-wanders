@@ -212,3 +212,13 @@ def test_core_capability_suite_is_not_placeholder_content():
     assert "assert True  # placeholder" not in test_ginji
     assert "add clear recovery tests for git functionality" not in test_ginji
     assert "from src.ginji import bash_exec, read_file, write_file, edit_file, list_files, search_files" in test_ginji
+
+
+def test_force_run_bypasses_daily_post_guard():
+    evolve_script = (ROOT / "scripts" / "evolve.sh").read_text(encoding="utf-8", errors="replace")
+    workflow = (ROOT / ".github" / "workflows" / "evolve.yml").read_text(encoding="utf-8", errors="replace")
+
+    assert "workflow_dispatch:" in workflow
+    assert "FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && 'true' || '' }}" in workflow
+    assert 'if [[ "${FORCE_RUN:-}" == "true" ]]; then' in evolve_script
+    assert "continuing because FORCE_RUN=true" in evolve_script

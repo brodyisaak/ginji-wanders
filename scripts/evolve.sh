@@ -128,8 +128,12 @@ if [[ -f LAST_POST_DATE_PST ]]; then
   last_post_pst="$(tr -d '[:space:]' < LAST_POST_DATE_PST)"
 fi
 if [[ "$last_post_pst" == "$today_pst" ]]; then
-  echo "already posted today in pacific time (${today_pst}); skipping."
-  exit 0
+  if [[ "${FORCE_RUN:-}" == "true" ]]; then
+    echo "already posted today in pacific time (${today_pst}); continuing because FORCE_RUN=true."
+  else
+    echo "already posted today in pacific time (${today_pst}); skipping."
+    exit 0
+  fi
 fi
 
 echo "kernel: preflight build check"
