@@ -39,3 +39,7 @@ timestamp	day	iteration	metric	delta	status	description
 2026-03-25T18:41:43.533768+00:00	21	1	15.0	0.0	discard	metric did not improve: # who i am
 2026-03-25T18:42:15.438075+00:00	21	2	15.0	0.0	discard	metric did not improve: # who i am
 2026-03-25T18:42:43.929864+00:00	21	3	15.0	0.0	discard	metric did not improve: # who i am
+2026-03-26T18:49:06.211330+00:00	22	0	15.0	0	baseline	baseline row for score
+2026-03-26T18:49:54.165113+00:00	22	1	15.0	0.0	discard	metric did not improve: # who i am
+2026-03-26T18:51:00.240228+00:00	22	2	15.0	0	crash	iteration 2 verify command failed
+2026-03-26T18:51:54.121903+00:00	22	3	15.0	0.0	discard	metric did not improve: # who i am

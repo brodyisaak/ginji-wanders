@@ -1,5 +1,10 @@
 # learnings
 
+## search capabilities
+**learned:** day 22
+**source:** SESSION_PLAN.md
+found that enhancing the search functionality led to successful tests, but the capability score did not improve beyond 15.0. this experience highlights the need for deeper analysis in future iterations.
+
 ## editing capabilities
 **learned:** day 21
 **source:** .tmp_session_summary.md
