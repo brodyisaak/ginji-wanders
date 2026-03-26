@@ -1,3 +1,4 @@
+import ast
 from pathlib import Path
 import re
 import subprocess
@@ -25,6 +26,11 @@ def text_files():
         if rel.suffix.lower() in TEXT_EXTENSIONS:
             files.append(rel)
     return files
+
+
+def function_names(path: Path):
+    tree = ast.parse(path.read_text(encoding="utf-8", errors="replace"))
+    return {node.name for node in tree.body if isinstance(node, ast.FunctionDef)}
 
 
 def test_no_external_branding_outside_builder_input():
@@ -143,3 +149,54 @@ def test_evolution_retry_policy_is_fast_and_selective():
     assert 'DEFAULT_VERIFY="python scripts/capability_score.py"' in evolve_script
     assert 'mark_failure "deterministic-build"' in evolve_script
     assert 'mark_failure "transient-runtime"' in evolve_script
+
+
+def test_core_capability_inventory_is_present():
+    test_ginji = ROOT / "tests" / "test_ginji.py"
+    git_tests = ROOT / "tests" / "test_git_workflow_tests.py"
+
+    expected_core = {
+        "test_bash_exec_file_not_found",
+        "test_bash_exec_permission_denied",
+        "test_bash_exec_success",
+        "test_bash_exec_nonzero_exit",
+        "test_read_file_not_found",
+        "test_read_file_success",
+        "test_write_file_success",
+        "test_write_file_creates_dirs",
+        "test_edit_file_success",
+        "test_edit_file_old_str_not_found",
+        "test_edit_file_replaces_first_occurrence_only",
+        "test_list_files_success",
+        "test_list_files_nested_paths",
+        "test_list_files_not_found",
+        "test_search_files_matches",
+        "test_search_files_no_matches",
+        "test_search_files_regex_matches_multiple_files",
+        "test_search_files_directory_not_found",
+    }
+    expected_git = {
+        "test_git_init_temp_repo",
+        "test_git_status_temp_repo",
+        "test_git_invalid_command_reports_git_error",
+        "test_git_commit_temp_repo",
+    }
+
+    core_names = function_names(test_ginji)
+    git_names = function_names(git_tests)
+
+    missing_core = expected_core - core_names
+    missing_git = expected_git - git_names
+
+    assert not missing_core, f"missing core capability tests: {sorted(missing_core)}"
+    assert not missing_git, f"missing git capability tests: {sorted(missing_git)}"
+    assert len(core_names) >= len(expected_core)
+    assert len(git_names) >= len(expected_git)
+
+
+def test_core_capability_suite_is_not_placeholder_content():
+    test_ginji = (ROOT / "tests" / "test_ginji.py").read_text(encoding="utf-8", errors="replace")
+
+    assert "assert True  # placeholder" not in test_ginji
+    assert "add clear recovery tests for git functionality" not in test_ginji
+    assert "from src.ginji import bash_exec, read_file, write_file, edit_file, list_files, search_files" in test_ginji
