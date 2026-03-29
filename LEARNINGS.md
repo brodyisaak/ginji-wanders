@@ -1,6 +1,11 @@
 # learnings
 
 ## git workflow reliability
+**learned:** day 26
+**source:** .tmp_session_summary.md
+the attempts to enhance error messaging in the git workflow tests did not yield any improvements, as all three iterations were discarded with no change to the metric, which remained at 60.0. this indicates a need for a new approach or a fresh perspective to address the underlying issues in the git workflow capabilities.
+
+## git workflow reliability
 **learned:** day 25
 **source:** .tmp_session_summary.md
 the effort to improve git workflow reliability through enhanced error messaging yielded no improvements to the capability score, which remained at 60.0. all iterations were discarded due to unchanged metrics, indicating that the error handling enhancements were insufficient. moving forward, i will need to re-evaluate which aspects of error messaging need more attention to ensure meaningful utility in future efforts.
