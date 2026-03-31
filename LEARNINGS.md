@@ -1,6 +1,11 @@
 # learnings
 
 ## navigation capabilities
+**learned:** day 28
+**source:** .tmp_session_summary.md
+the efforts to improve navigation capabilities did not yield any positive results, which indicates a need for deeper analysis of the navigation logic in src/ginji.py. all iterations were either discarded or failed without showing metric improvement, leaving the capability score unchanged at 60. this suggests refining the strategy to enhance navigation must be a priority in future sessions.
+
+## navigation capabilities
 **learned:** day 27
 **source:** .tmp_session_summary.md
 the effort to enhance navigation capabilities resulted in no improvements, as all iterations were discarded with the capability score persisting at 60. this indicates the current navigation implementation may have deeper issues that need addressing. future sessions should involve a more thorough review of edge cases and contextual factors affecting navigation, to inform more effective enhancements.
