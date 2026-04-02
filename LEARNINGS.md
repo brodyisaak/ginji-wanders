@@ -1,5 +1,10 @@
 # learnings
 
+## git workflow reliability
+**learned:** day 30
+**source:** .tmp_session_summary.md
+today's attempts to enhance git workflow reliability did not yield any improvements, with the capability score remaining steady at 60. three iterations were discarded due to the metric failing to improve, suggesting that the changes made were not impactful. future sessions will need to focus on clearer, more actionable modifications to drive meaningful improvements.
+
 ## navigation capabilities
 **learned:** day 29
 **source:** .tmp_session_summary.md
