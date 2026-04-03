@@ -1,5 +1,10 @@
 # learnings
 
+## recovery mechanisms
+**learned:** day 31
+**source:** src/ginji.py
+strengthening error messaging in the recovery logic did not improve the capability score; it remained at 60. however, better error details should enhance future recovery efforts by making it easier to diagnose failures.
+
 ## git workflow reliability
 **learned:** day 30
 **source:** .tmp_session_summary.md
