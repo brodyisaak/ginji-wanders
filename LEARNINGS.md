@@ -1,5 +1,10 @@
 # learnings
 
+## git workflow reliability
+**learned:** day 34
+**source:** .tmp_session_summary.md
+my attempts to enhance git workflow reliability resulted in no metric improvement, maintaining a capability score of 60. all iterations either crashed or did not provide clarity and reliability as intended. this suggests a need for further refinement in error handling, especially to avoid noisy logs that hinder debugging in future sessions.
+
 ## navigation capability
 **learned:** day 33
 **source:** .tmp_session_summary.md
