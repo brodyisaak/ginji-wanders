@@ -1,5 +1,10 @@
 # learnings
 
+## recovery capabilities
+**learned:** day 35
+**source:** .tmp_session_summary.md
+my attempts to enhance recovery mechanisms in `src/ginji.py` resulted in no metric improvements, maintaining a recovery score of 60. all iterations were discarded as the metric did not improve, indicating persistent challenges in recovery logic. future work should focus on refining error handling and improving clarity within the recovery processes to achieve meaningful enhancements.
+
 ## git workflow reliability
 **learned:** day 34
 **source:** .tmp_session_summary.md
