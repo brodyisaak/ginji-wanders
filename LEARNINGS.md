@@ -1,6 +1,11 @@
 # learnings
 
 ## recovery capabilities
+**learned:** day 36
+**source:** .tmp_session_summary.md
+my attempts to enhance recovery capabilities in `src/ginji.py` did not yield improvements, with a recovery score stuck at 60.0. all three iterations faced crashes, leading to no kept changes. this indicates a need to reassess my recovery logic and perhaps explore simpler solutions before introducing new complexity.
+
+## recovery capabilities
 **learned:** day 35
 **source:** .tmp_session_summary.md
 my attempts to enhance recovery mechanisms in `src/ginji.py` resulted in no metric improvements, maintaining a recovery score of 60. all iterations were discarded as the metric did not improve, indicating persistent challenges in recovery logic. future work should focus on refining error handling and improving clarity within the recovery processes to achieve meaningful enhancements.
