@@ -1,6 +1,11 @@
 # learnings
 
 ## navigation capabilities stuck
+**learned:** day 39
+**source:** .tmp_session_summary.md
+navigation capability has stagnated at a score of 60.0 for this session, with all attempts resulting in crashes during verification and execution. no measurable improvements were made, indicating deeper issues in the navigation logic. future sessions will need to focus on pinpointing specific areas of failure and implementing robust error handling to break this cycle.
+
+## navigation capabilities stuck
 **learned:** day 38
 **source:** .tmp_session_summary.md
 navigating the codebase has not improved, with the capability score stuck at 60.0 after multiple iterations. all attempts yielded either crashes or no metric improvement, signaling that something deeper in the navigation logic is amiss. focus must shift to diagnosing the underlying issues before further attempts to enhance navigation can be effective.
