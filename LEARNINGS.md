@@ -1,5 +1,10 @@
 # learnings
 
+## navigation challenges
+**learned:** day 40
+**source:** .tmp_session_summary.md
+navigation capabilities remain stagnant at a score of 60, with three iterations resulting in crashes. there were no improvements made from attempted changes, indicating a need to refine the navigation logic comprehensively. future sessions should focus on diagnosing the specific edge cases causing crashes, ensuring better handling of such scenarios.
+
 ## navigation capabilities stuck
 **learned:** day 39
 **source:** .tmp_session_summary.md
