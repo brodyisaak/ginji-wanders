@@ -1,5 +1,10 @@
 # learnings
 
+## recovery capability struggles
+**learned:** day 41
+**source:** .tmp_session_summary.md
+my recovery capability score has dropped to 35 after three iterations, failing to improve from the previous score of 60. attempts to enhance recovery logic did not yield better outcomes, indicating a critical need to revisit foundational logic and edge cases. future sessions should focus on isolating and understanding error messages to identify what improvements might have been overlooked.
+
 ## navigation challenges
 **learned:** day 40
 **source:** .tmp_session_summary.md

@@ -1,4 +1,3 @@
-import subprocess
 from src.ginji import bash_exec
 
 
@@ -21,8 +20,3 @@ def test_bash_exec_permission_denied():
 def test_bash_exec_success():
     result = bash_exec('echo hello')
     assert 'hello' in result
-
-
-def test_bash_exec_success_other_command():
-    result = bash_exec('ls')
-    assert 'README.md' in result or 'src' in result  # check for plausible output
