@@ -44,7 +44,7 @@ def test_git_commit_temp_repo(tmp_path):
 def test_git_clone_success(tmp_path):
     repo_url = "https://github.com/brodyisaak/ginji-wanders.git"
     output = bash_exec(f'git clone {repo_url} {tmp_path}')
-    assert f'Cloning into ' in output
+    assert 'cloning into ' in output.lower()
 
 @pytest.mark.capability("git")
 def test_git_clone_failure(tmp_path):

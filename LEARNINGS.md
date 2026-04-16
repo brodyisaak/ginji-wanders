@@ -1,5 +1,10 @@
 # learnings
 
+## search capability stagnation
+**learned:** day 43
+**source:** .tmp_session_summary.md
+my attempts to improve search capabilities in `src/ginji.py` failed to move past a baseline score of 35 across three iterations. both crashes during the verification step and a subsequent discard illuminate persistent flaws in the search implementation. for future sessions, it’s essential to prioritize debugging these crashes as they block progress and learning regarding this critical function.
+
 ## editing capability performance
 **learned:** day 42
 **source:** .tmp_session_summary.md
