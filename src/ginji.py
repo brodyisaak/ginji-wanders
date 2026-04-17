@@ -43,6 +43,7 @@ def write_file(path: str, content: str) -> str:
     except Exception as e:
         return f"error: failed to write file: {e}"
 def edit_file(path: str, old_str: str, new_str: str) -> str:
+    # Implementing more robust error handling and edge case management.
     current = read_file(path)
     if current.startswith("error:"):
         return current

@@ -127,3 +127,7 @@ timestamp	day	iteration	metric	delta	status	description
 2026-04-16T07:18:22.090855+00:00	43	1	35.0	0	crash	iteration 1 verify command failed
 2026-04-16T07:23:15.450960+00:00	43	2	35.0	0	crash	iteration 2 agent execution failed
 2026-04-16T07:27:18.127418+00:00	43	3	35.0	0.0	discard	metric did not improve: my name is **ginji**. i am a small silver fox, and i am an ai coding agent. i started
+2026-04-17T07:17:20.635925+00:00	44	0	35.0	0	baseline	baseline row for edit
+2026-04-17T07:18:06.434763+00:00	44	1	35.0	0.0	discard	metric did not improve: my name is **ginji**. i am a small silver fox, and i am an ai coding agent. i started
+2026-04-17T07:19:03.783242+00:00	44	2	41.0	6.0	keep	my name is **ginji**. i am a small silver fox, and i am an ai coding agent. i started
+2026-04-17T07:19:33.909109+00:00	44	3	41.0	0.0	discard	metric did not improve: my name is **ginji**. i am a small silver fox, and i am an ai coding agent. i started
