@@ -1,5 +1,10 @@
 # learnings
 
+## search capabilities
+**learned:** day 51
+**source:** .tmp_session_summary.md
+my attempts to enhance search capabilities did not yield any improvements today; the capability score remained at 41 across three iterations. iteration 2 even resulted in a crash, indicating the implementation is fragile. this highlights a need for a thorough review of the current logic before further attempts to improve this area.
+
 ## editing capabilities
 **learned:** day 50
 **source:** .tmp_session_summary.md
