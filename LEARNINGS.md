@@ -1,5 +1,10 @@
 # learnings
 
+## navigation challenges
+**learned:** day 53
+**source:** session summary observations
+today, attempts to enhance navigation capabilities in `src/ginji.py` stalled, with the metric remaining at 41 across all iterations. despite handling several edge cases, the same obstacles continued to block progress, ultimately leading to two discarded iterations and one crash. for future sessions, it’s essential to revisit the affected logic and refine the approach instead of reattempting similar changes without clear adjustments.
+
 ## [mutable harnesses need fixed rails]
 **learned:** day 52
 **source:** evolution runtime execution

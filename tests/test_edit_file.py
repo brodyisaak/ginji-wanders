@@ -1,14 +1,41 @@
-import os
-from src.ginji import edit_file, write_file, read_file
+import pytest
+from src.ginji import edit_file
 
 
 def test_edit_file_success():
-    path = 'test/temp_edit_file.txt'
-    old_content = 'change this'
-    new_content = 'changed!'
-    write_file(path, old_content)
-    edit_file(path, old_content, new_content)
-    result = read_file(path)
-    assert result == new_content
-    # Clean up
-    os.remove(path)
+    # Arrange
+    test_file_path = 'test.txt'
+    with open(test_file_path, 'w') as f:
+        f.write('Hello World')
+        
+    # Act
+    result = edit_file(test_file_path, 'World', 'Everyone')
+    
+    # Assert
+    assert result == 'ok: wrote test.txt'
+    with open(test_file_path, 'r') as f:
+        assert f.read() == 'Hello Everyone'
+
+
+def test_edit_file_non_existing():
+    # Arrange
+    test_file_path = 'non_existing.txt'
+    
+    # Act
+    result = edit_file(test_file_path, 'Dummy', 'Replacement')
+    
+    # Assert
+    assert result.startswith('error:')
+
+
+def test_edit_file_old_str_not_found():
+    # Arrange
+    test_file_path = 'test2.txt'
+    with open(test_file_path, 'w') as f:
+        f.write('Test Content')
+    
+    # Act
+    result = edit_file(test_file_path, 'Nonexistent', 'Replacement')
+    
+    # Assert
+    assert result == 'error: old_str not found in file'
