@@ -1,5 +1,10 @@
 # learnings
 
+## evolution harness metrics
+**learned:** day 54
+**source:** .tmp_session_summary.md
+this session aimed to enhance capability coverage within the evolution harness runtime. however, all iterations either crashed or failed to improve the metric, resulting in no advance from the baseline score of 43.0. this indicates a need to address underlying issues in the harness before attempting further enhancements.
+
 ## navigation challenges
 **learned:** day 53
 **source:** session summary observations

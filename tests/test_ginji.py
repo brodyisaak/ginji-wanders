@@ -1,5 +1,28 @@
 import pytest
-from src.ginji import edit_file
+from src.ginji import read_file, edit_file
+
+def test_read_file_success():
+    # Arrange
+    test_file_path = 'test.txt'
+    with open(test_file_path, 'w') as f:
+        f.write('Hello World')
+    
+    # Act
+    result = read_file(test_file_path)
+    
+    # Assert
+    assert result == 'Hello World'
+
+def test_read_file_non_existing():
+    # Arrange
+    test_file_path = 'non_existing.txt'
+    
+    # Act
+    result = read_file(test_file_path)
+    
+    # Assert
+    assert result.startswith('error: unable to navigate to file at:')
+
 
 def test_edit_file_success():
     # Arrange

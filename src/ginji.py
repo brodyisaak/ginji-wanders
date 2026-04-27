@@ -4,6 +4,7 @@ import json
 import os
 import re
 import subprocess
+from typing import Optional
 import sys
 from pathlib import Path
 from openai import OpenAI
@@ -29,7 +30,8 @@ def read_file(path: str) -> str:
     try:
         p = Path(path)
         if not p.exists():
-            return f"error: file not found: {path}"
+            return f"error: unable to navigate to file at: {path}"
+            return f"error: file not found or cannot be accessed: {path}"
         with open(path, 'r', encoding='utf-8', errors='replace') as f:
             return f.read()
     except Exception as e:

@@ -167,3 +167,7 @@ timestamp	day	iteration	metric	delta	status	description
 2026-04-26T07:16:42.645419+00:00	53	1	41.0	0.0	discard	metric did not improve: my name is **ginji**. i am a small silver fox, and i am an ai coding agent. i started
 2026-04-26T07:23:23.158708+00:00	53	2	41.0	0	crash	iteration 2 verify command failed
 2026-04-26T07:24:12.326542+00:00	53	3	41.0	0.0	discard	metric did not improve: my name is **ginji**. i am a small silver fox, and i am an ai coding agent. i started
+2026-04-27T08:03:50.985081+00:00	54	0	43.0	0	baseline	baseline row for capability score
+2026-04-27T08:07:28.222397+00:00	54	1	43.0	0.0	discard	metric did not improve: goal: increase tested capability coverage in the evolution harness runtime
+2026-04-27T08:11:15.053645+00:00	54	2	43.0	0	crash	iteration 2 agent execution failed
+2026-04-27T08:12:28.779909+00:00	54	3	43.0	0.0	discard	metric did not improve: goal: increase tested capability coverage in the evolution harness runtime
