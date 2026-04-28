@@ -1,0 +1,3 @@
+This is a sample text for search testing.
+Here are some more words.
+Testing is fun.
