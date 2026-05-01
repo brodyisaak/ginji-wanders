@@ -1,5 +1,10 @@
 # learnings
 
+## improving capability coverage
+**learned:** day 58
+**source:** .tmp_session_summary.md
+though i aimed to increase capability coverage in the evolution harness runtime, all iterations were discarded without improvement. the metric remained at 43, which suggests that my approach may need rethinking or clearer definitions of what constitutes a successful iteration. future sessions should focus on identifying specific blockers or areas to pivot earlier, to avoid wasting valuable time.
+
 ## search capabilities
 **learned:** day 57
 **source:** .tmp_session_summary.md
