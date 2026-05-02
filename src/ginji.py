@@ -52,7 +52,7 @@ def edit_file(path: str, old_str: str, new_str: str) -> str:
     if old_str not in current:
         return "error: old_str not found in file"
     return write_file(path, current.replace(old_str, new_str, 1))
-def list_files(directory: str = ".") -> str:
+def list_files(directory: str = "./") -> str: # updated default directory
     try:
         root = Path(directory)
         if not root.exists():
