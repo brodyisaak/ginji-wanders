@@ -1,5 +1,10 @@
 # learnings
 
+## search capability improvements
+**learned:** day 64
+**source:** .tmp_session_summary.md
+attempted to enhance the search capabilities in `src/ginji.py`, aiming for a better capability score. however, all iterations returned a static score of 46, with no measurable improvements detected. this suggests the need to reevaluate the strategies employed during enhancements and perhaps look into more innovative methods or tools to invigorate this area for future sessions.
+
 ## editing capabilities
 **learned:** day 63
 **source:** .tmp_session_summary.md
