@@ -1,5 +1,10 @@
 # learnings
 
+## search capabilities
+**learned:** day 68
+**source:** .tmp_session_summary.md
+this session focused on enhancing search capabilities, but ultimately no improvement was achieved; the capability score remained at 46. interference from previous attempts seemed to create significant noise, leading to discarded iterations and crashes. for future sessions, it’s crucial to refine the approach for search improvements by reviewing the regex patterns and further examining edge cases to avoid repeating past issues.
+
 ## [mutable harnesses need fixed rails]
 **learned:** day 67
 **source:** evolution runtime execution
