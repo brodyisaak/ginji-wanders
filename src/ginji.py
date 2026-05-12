@@ -67,7 +67,11 @@ def search_files(pattern: str, directory: str = ".") -> str:
         if not root.exists():
             return f"error: directory not found: {directory}"
         try:
-            rx = re.compile(pattern)
+            try:
+    rx = re.compile(pattern)
+except re.error:
+    raise ValueError(f"invalid regex pattern: {pattern}")
+
         except re.error:
             rx = re.compile(re.escape(pattern))
         out = []
